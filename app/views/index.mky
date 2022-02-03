@@ -1,0 +1,9 @@
+<mky:extends name="layouts.template"/>
+
+<mky:section name="content">
+    <mky:if cond="$name == 'other'">
+        <div class="alert alert-warning">Other Page {{ $name }}</div>
+        <mky:else />
+        <div class="alert alert-warning">Page {{ $name }}</div>
+    </mky:if>
+</mky:section>

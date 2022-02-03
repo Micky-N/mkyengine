@@ -26,15 +26,24 @@ class MkyEngine
     private string $viewName = '';
     private string $viewPath = '';
     private array $includeData = [];
-    public array $errors;
+    private static array $variables = [];
 
+    /**
+     * Mky Contructor
+     * require config: views
+     * optional config: cache
+     * 
+     * @param array $config
+     * @throws MkyEngineException
+     */
     public function __construct(array $config)
     {
-        if(!isset($config['cache'])){
-            $config['cache'] = 'cache/views';
+        foreach (['views'] as $value) {
+            if(empty($config[$value])){
+                throw new MkyEngineException("Config $value not found");
+            }
         }
         $this->config = $config;
-        $this->errors = $_GET['errors'] ?? [];
     }
 
     /**
@@ -87,18 +96,16 @@ class MkyEngine
      * @param array $data
      * @param bool $extends
      * @return false|string
-     * @throws Exception
+     * @throws MkyEngineException
      */
     public function view(string $viewName, array $data = [], $extends = false)
     {
-        $viewPath = '';
+        $viewPath = $this->getConfig('views') . '/' . $this->parseViewName($viewName);
+
         if(!$extends){
-            $viewPath = $this->getConfig('views') . '/' . $this->parseViewName($viewName);
             $this->viewName = $viewName;
             $this->data = array_merge($this->data, $data);
             $this->viewPath = $viewPath;
-        } else {
-            $viewPath = $this->getConfig('layouts') . '/' . $this->parseViewName($viewName);
         }
         $this->view = file_get_contents($viewPath);
         $this->data = array_merge($this->data, $this->includeData);
@@ -178,7 +185,7 @@ class MkyEngine
      */
     private function getConfig(string $key)
     {
-        return $this->config[$key] ?? $this->config;
+        return $this->config[$key] ?? null;
     }
 
     /**
@@ -279,6 +286,7 @@ class MkyEngine
     {
         $str = sprintf('/%s%s ([\w]+=[\"\'](.*?)[\"\'])+? ?%s(.*?)%s%s%s/s', self::OPEN_FUNCTION[0], $key, self::OPEN_FUNCTION[1], self::CLOSE_FUNCTION[0], $key, self::CLOSE_FUNCTION[1]);
         $this->view = preg_replace_callback($str, function ($expression) use ($mkyDirective, $key) {
+            var_dump($expression);
             if(isset($expression[3])){
                 $xmlempty = str_replace($expression[3], '-- CODE --', $expression[0]);
             }
@@ -296,7 +304,7 @@ class MkyEngine
                     extract($this->data);
                     @eval("\$var = $attribute; return true;");
                     $exprArray[$k] = $var;
-                    Directive::setRealVariable((string)$attribute, $var);
+                    self::setRealVariable((string)$attribute, $var);
                 } else {
                     $attribute = (string)$attribute;
                     if(str_starts_with($attribute, '/') || strpos($attribute, '.')){
@@ -316,7 +324,7 @@ class MkyEngine
 
     private function singleDirective(MkyDirective $mkyDirective, $key, string $view)
     {
-        $str = sprintf('/(%s%s ([\w]+=[\"\'](.*?)[\"\'])+? ?%s)+/', self::SINGLE_FUNCTION[0], $key, self::SINGLE_FUNCTION[1]);
+        $str = sprintf('/(%s%s ([\w]+=[\"\'](.*?)[\"\'])?+ ?%s)+/', self::SINGLE_FUNCTION[0], $key, self::SINGLE_FUNCTION[1]);
         $this->view = preg_replace_callback($str, function ($expression) use ($mkyDirective, $key) {
             $xmlExpr = str_replace('mky:', '', $expression[0]);
             $xml = new \SimpleXMLElement($xmlExpr);
@@ -329,13 +337,13 @@ class MkyEngine
                         @eval("\$var = $attribute; return true;");
                         $var = is_string($var) ? "'$var'" : $var;
                         $exprArray[$k] = $var;
-                        Directive::setRealVariable((string)$attribute, $var);
+                        self::setRealVariable((string)$attribute, $var);
                     }else{
                         throw new MkyEngineException(sprintf('Undefined variable: %s', $attribute));
                     }
                 } else {
                     $attribute = (string)$attribute;
-                    if(str_starts_with($attribute, '/') || strpos($attribute, '.')){
+                    if(strpos($attribute, '/') === 0 || strpos($attribute, '.') !== false){
                         $attribute = (string)"'$attribute'";
                     }
                     @eval("\$var = $attribute; return true;");
@@ -365,5 +373,17 @@ class MkyEngine
             }
             $start .= '/';
         }
+    }
+
+    public static function getRealVariable($value)
+    {
+        $key = array_search($value, self::$variables, true);
+        unset(self::$variables[$key]);
+        return $key;
+    }
+
+    public static function setRealVariable($variable, $value)
+    {
+        self::$variables[$variable] = $value;
     }
 }

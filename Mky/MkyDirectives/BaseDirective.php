@@ -4,9 +4,10 @@
 namespace MkyEngine\MkyDirectives;
 
 
+use MkyEngine\MkyEngine;
 use MkyEngine\Interfaces\MkyDirectiveInterface;
 
-class BaseDirective extends Directive implements MkyDirectiveInterface
+class BaseDirective implements MkyDirectiveInterface
 {
     private static array $conditions = [
         'firstCaseSwitch' => false
@@ -59,7 +60,7 @@ class BaseDirective extends Directive implements MkyDirectiveInterface
 
     public function if($cond)
     {
-        $variable = $this->getRealVariable($cond);
+        $variable = MkyEngine::getRealVariable($cond);
         $cond = $variable ?? json_encode($cond);
         $expression = $cond;
         return "<?php if($expression): ?>";
@@ -67,7 +68,7 @@ class BaseDirective extends Directive implements MkyDirectiveInterface
 
     public function elseif($cond)
     {
-        $variable = $this->getRealVariable($cond);
+        $variable = MkyEngine::getRealVariable($cond);
         $cond = $variable ?? json_encode($cond);
         $expression = $cond;
         return "<?php else if($expression): ?>";
@@ -86,7 +87,7 @@ class BaseDirective extends Directive implements MkyDirectiveInterface
     public function each($loop, string $as = null, string $key = null)
     {
 
-        $variable = $this->getRealVariable($loop);
+        $variable = MkyEngine::getRealVariable($loop);
         $loop = $variable !== false ? $variable : var_export($loop, true);
         $loop .= ' as ' . ($key ? "\$$key => " : '') . ($as ? "\$$as" : '$self');
         return "<?php foreach($loop): ?>";
@@ -111,7 +112,7 @@ class BaseDirective extends Directive implements MkyDirectiveInterface
     public function switch($cond)
     {
         self::$conditions['firstCaseSwitch'] = true;
-        $variable = $this->getRealVariable($cond);
+        $variable = MkyEngine::getRealVariable($cond);
         $cond = $variable !== false ? $variable : (is_string($cond) ? "'$cond'" : $cond);
         return '<?php switch(' . $cond . '):';
     }

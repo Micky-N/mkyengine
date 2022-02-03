@@ -10,7 +10,7 @@ class Directive
 {
     private static array $variables = [];
 
-    public function getRealVariable($value)
+    public static function getRealVariable($value)
     {
         $key = array_search($value, self::$variables, true);
         unset(self::$variables[$key]);
