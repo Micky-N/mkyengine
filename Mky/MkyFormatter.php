@@ -1,12 +1,12 @@
 <?php
 
 
-namespace Core\MkyCompiler;
+namespace MkyEngine;
 
 
-use Core\Interfaces\MkyFormatterInterface;
-use Core\MkyCompiler\MkyFormatters\ArrayFormatter;
-use Core\MkyCompiler\MkyFormatters\BaseFormatter;
+use MkyEngine\Interfaces\MkyFormatterInterface;
+use MkyEngine\MkyFormatters\ArrayFormatter;
+use MkyEngine\MkyFormatters\BaseFormatter;
 
 class MkyFormatter
 {

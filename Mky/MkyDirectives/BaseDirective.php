@@ -1,10 +1,10 @@
 <?php
 
 
-namespace Core\MkyCompiler\MkyDirectives;
+namespace MkyEngine\MkyDirectives;
 
 
-use Core\Interfaces\MkyDirectiveInterface;
+use MkyEngine\Interfaces\MkyDirectiveInterface;
 
 class BaseDirective extends Directive implements MkyDirectiveInterface
 {
@@ -16,7 +16,6 @@ class BaseDirective extends Directive implements MkyDirectiveInterface
     public function getFunctions()
     {
         return [
-            'assets' => [[$this, 'assets']],
             'script' => [[$this, 'script'], [$this, 'endscript']],
             'style' => [[$this, 'style'], [$this, 'endstyle']],
             'if' => [[$this, 'if'], [$this, 'endif']],
@@ -28,13 +27,7 @@ class BaseDirective extends Directive implements MkyDirectiveInterface
             'case' => [[$this, 'case']],
             'break' => [[$this, 'break']],
             'default' => [[$this, 'default']],
-            'dump' => [[$this, 'dump']],
-            'permission' => [[$this, 'permission'], [$this, 'endpermission']],
-            'notpermission' => [[$this, 'notpermission'], [$this, 'endnotpermission']],
-            'auth' => [[$this, 'auth'], [$this, 'endauth']],
             'json' => [[$this, 'json']],
-            'currentRoute' => [[$this, 'currentRoute'], [$this, 'endcurrentRoute']],
-            'route' => [[$this, 'route']]
         ];
     }
 
@@ -148,73 +141,9 @@ class BaseDirective extends Directive implements MkyDirectiveInterface
         return '<?php endswitch; ?>';
     }
 
-    public function dump($var)
-    {
-        dump($var);
-    }
-
-    public function can($permission, $subject)
-    {
-        $condition = json_encode(\Core\Facades\Permission::authorizeAuth($permission, $subject));
-        return "<?php if($condition): ?>";
-    }
-
-    public function endcan()
-    {
-        return '<?php endif; ?>';
-    }
-
-    public function notcan($permission, $subject)
-    {
-        $condition = json_encode(\Core\Facades\Permission::authorizeAuth($permission, $subject));
-        return "<?php if(!$condition): ?>";
-    }
-
-    public function endnotcan()
-    {
-        return '<?php endif; ?>';
-    }
-
-    public function auth(bool $is)
-    {
-        $cond = json_encode($is === (new \Core\AuthManager())->isLogin());
-        return "<?php if($cond): ?>";
-    }
-
-    public function endauth()
-    {
-        return '<?php endif; ?>';
-    }
-
     public function json($data)
     {
         $data = json_encode($data);
         return $data;
-    }
-
-    public function currentRoute(string $name = '', bool $path = false)
-    {
-        $current = \Core\Facades\Route::currentRoute($name, $path);
-        if($name){
-            $current = json_encode($current);
-            return "<?php if($current): ?>";
-        }
-        return $current;
-    }
-
-    public function endcurrentRoute()
-    {
-        return '<?php endif; ?>';
-    }
-
-    public function assets(string $path)
-    {
-        $path = trim($path, '\'\"');
-        return BASE_ULR . 'public/' . 'assets/' . $path;
-    }
-
-    public function route(string $name, array $params = [])
-    {
-        return \Core\Facades\Route::generateUrlByName($name, $params);
     }
 }

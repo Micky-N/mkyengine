@@ -1,10 +1,10 @@
 <?php
 
 
-namespace Core\MkyCompiler\MkyFormatters;
+namespace MkyEngine\MkyFormatters;
 
 
-use Core\Interfaces\MkyFormatterInterface;
+use MkyEngine\Interfaces\MkyFormatterInterface;
 
 class ArrayFormatter implements MkyFormatterInterface
 {

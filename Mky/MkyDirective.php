@@ -1,9 +1,9 @@
 <?php
 
-namespace Core\MkyCompiler;
+namespace MkyEngine;
 
-use Core\Interfaces\MkyDirectiveInterface;
-use Core\MkyCompiler\MkyDirectives\BaseDirective;
+use MkyEngine\Interfaces\MkyDirectiveInterface;
+use MkyEngine\MkyDirectives\BaseDirective;
 
 class MkyDirective
 {

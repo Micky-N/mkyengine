@@ -1,14 +1,11 @@
 <?php
 
-namespace Core\MkyCompiler;
+namespace MkyEngine;
 
-use Core\Interfaces\MkyDirectiveInterface;
-use Core\Interfaces\MkyFormatterInterface;
-use Core\MkyCompiler\Exceptions\MkyEngineException;
-use Core\MkyCompiler\MkyDirectives\Directive;
-use Exception;
-use Core\Facades\Cache;
-use Core\Facades\Session;
+use MkyEngine\Interfaces\MkyDirectiveInterface;
+use MkyEngine\Interfaces\MkyFormatterInterface;
+use MkyEngine\Exceptions\MkyEngineException;
+use MkyEngine\MkyDirectives\Directive;
 
 class MkyEngine
 {
@@ -109,10 +106,10 @@ class MkyEngine
 
         $cachePath = $this->getConfig('cache') . '/' . md5($this->viewName) . self::CACHE_SUFFIX;
         if(!file_exists($cachePath)){
-            Cache::addCache($cachePath, $this->view);
+            $this->addCache($cachePath, $this->view);
         } else if(explode("\n", file_get_contents($cachePath)) !== explode("\n", $this->view) && trim($this->view)){
             echo '<!-- cache file updated -->';
-            Cache::addCache($cachePath, $this->view);
+            $this->addCache($cachePath, $this->view);
         }
 
         if(
@@ -120,7 +117,7 @@ class MkyEngine
             (filemtime($cachePath) < filemtime($this->viewPath))
         ){
             echo '<!-- cache file updated -->';
-            Cache::addCache($cachePath, $this->view);
+            $this->addCache($cachePath, $this->view);
         }
         if(!$extends){
             ob_start();
@@ -351,5 +348,22 @@ class MkyEngine
             return str_replace($expression[1], $newExpr, $expression[0]);
 
         }, $view);
+    }
+
+    private function addCache(string $cachePath, string $view)
+    {
+        $array = explode('/', $cachePath);
+        $start = '';
+        foreach ($array as $file) {
+            $start .= $file;
+            if(strpos($file, '.') !== false){
+                file_put_contents($start, $view);
+            } else {
+                if(!file_exists($start)){
+                    mkdir($start, 1);
+                }
+            }
+            $start .= '/';
+        }
     }
 }

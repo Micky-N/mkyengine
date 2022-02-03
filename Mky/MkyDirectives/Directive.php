@@ -1,10 +1,10 @@
 <?php
 
 
-namespace Core\MkyCompiler\MkyDirectives;
+namespace MkyEngine\MkyDirectives;
 
 
-use Core\MkyCompiler\MkyEngineException;
+use MkyEngine\MkyEngineException;
 
 class Directive
 {

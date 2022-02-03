@@ -1,10 +1,10 @@
 <?php
 
 
-namespace Core\MkyCompiler\MkyFormatters;
+namespace MkyEngine\MkyFormatters;
 
 
-class BaseFormatter implements \Core\Interfaces\MkyFormatterInterface
+class BaseFormatter implements \MkyEngine\Interfaces\MkyFormatterInterface
 {
 
     public function getFormats()
