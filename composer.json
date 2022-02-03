@@ -1,0 +1,14 @@
+{
+    "name": "micky/mky",
+    "description": "Mky Template Engine",
+    "type": "library",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Ndinga Mickael",
+            "email": "ndingamickael@gmail.com"
+        }
+    ],
+    "minimum-stability": "dev",
+    "require": {}
+}
