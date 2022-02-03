@@ -278,24 +278,41 @@ class MkyEngine
             foreach ($directives->getFunctions() as $key => $function) {
                 $this->singleDirective($mkyDirective, $key, $this->view);
                 $this->blockDirective($mkyDirective, $key, $this->view);
+                $this->blockEmptyDirective($mkyDirective, $key, $this->view);
             }
         }
+    }
+
+    private function blockEmptyDirective(MkyDirective $mkyDirective, $key, string $view)
+    {
+        $str = sprintf('/%s%s ?%s(.*?)%s%s%s/s', self::OPEN_FUNCTION[0], $key, self::OPEN_FUNCTION[1], self::CLOSE_FUNCTION[0], $key, self::CLOSE_FUNCTION[1]);
+        $this->view = preg_replace_callback($str, function ($expression) use ($mkyDirective, $key) {
+            preg_match(sprintf('/%s%s ?%s/', self::OPEN_FUNCTION[0], $key, self::OPEN_FUNCTION[1]), $expression[0], $xmlExprUp);
+            $xmlExprUp = $xmlExprUp[0];
+
+            preg_match(sprintf('/%s%s%s/', self::CLOSE_FUNCTION[0], $key, self::CLOSE_FUNCTION[1]), $expression[0], $xmlExprDown);
+            $xmlExprDown = $xmlExprDown[0];
+            $params = [$key, []];
+            $ref = new \ReflectionClass($mkyDirective);
+            $getUp = $ref->getMethod('callFunction')->invokeArgs($ref->newInstance(), $params);
+            $getDown = $ref->getMethod('callFunction')->invokeArgs($ref->newInstance(), array_merge($params, [false]));
+            return str_replace([$xmlExprUp, $xmlExprDown], [$getUp, $getDown], $expression[0]);
+        }, $view);
     }
 
     private function blockDirective(MkyDirective $mkyDirective, $key, string $view)
     {
         $str = sprintf('/%s%s ([\w]+=[\"\'](.*?)[\"\'])+? ?%s(.*?)%s%s%s/s', self::OPEN_FUNCTION[0], $key, self::OPEN_FUNCTION[1], self::CLOSE_FUNCTION[0], $key, self::CLOSE_FUNCTION[1]);
         $this->view = preg_replace_callback($str, function ($expression) use ($mkyDirective, $key) {
-            var_dump($expression);
             if(isset($expression[3])){
                 $xmlempty = str_replace($expression[3], '-- CODE --', $expression[0]);
             }
 
             preg_match(sprintf('/%s%s ([\w]+=[\"\'](.*?)[\"\'])+? ?%s/', self::OPEN_FUNCTION[0], $key, self::OPEN_FUNCTION[1]), $expression[0], $xmlExprUp);
             $xmlExprUp = $xmlExprUp[0];
-
             preg_match(sprintf('/%s%s%s/', self::CLOSE_FUNCTION[0], $key, self::CLOSE_FUNCTION[1]), $expression[0], $xmlExprDown);
             $xmlExprDown = $xmlExprDown[0];
+
             $xmlExpr = str_replace('mky:', '', $xmlempty);
             $xml = new \SimpleXMLElement($xmlExpr);
             $exprArray = [];
@@ -307,7 +324,7 @@ class MkyEngine
                     self::setRealVariable((string)$attribute, $var);
                 } else {
                     $attribute = (string)$attribute;
-                    if(str_starts_with($attribute, '/') || strpos($attribute, '.')){
+                    if(strpos($attribute, '/') === 0 || strpos($attribute, '.')){
                         $attribute = (string)"'$attribute'";
                     }
                     @eval("\$var = $attribute; return true;");
@@ -324,7 +341,7 @@ class MkyEngine
 
     private function singleDirective(MkyDirective $mkyDirective, $key, string $view)
     {
-        $str = sprintf('/(%s%s ([\w]+=[\"\'](.*?)[\"\'])?+ ?%s)+/', self::SINGLE_FUNCTION[0], $key, self::SINGLE_FUNCTION[1]);
+        $str = sprintf('/(%s%s ([\w]+=[\"\'](.*?)[\"\'])? ?%s)+/', self::SINGLE_FUNCTION[0], $key, self::SINGLE_FUNCTION[1]);
         $this->view = preg_replace_callback($str, function ($expression) use ($mkyDirective, $key) {
             $xmlExpr = str_replace('mky:', '', $expression[0]);
             $xml = new \SimpleXMLElement($xmlExpr);
@@ -343,7 +360,7 @@ class MkyEngine
                     }
                 } else {
                     $attribute = (string)$attribute;
-                    if(strpos($attribute, '/') === 0 || strpos($attribute, '.') !== false){
+                    if(strpos($attribute, '/') === 0 || strpos($attribute, '.')){
                         $attribute = (string)"'$attribute'";
                     }
                     @eval("\$var = $attribute; return true;");

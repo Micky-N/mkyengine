@@ -14,5 +14,9 @@
         "psr-4": {
             "MkyEngine\\": "Mky/"
         }
-    }
+    },
+  "require": {
+    "ext-simplexml": "*",
+    "ext-json": "*"
+  }
 }
