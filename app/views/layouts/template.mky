@@ -15,6 +15,6 @@
     <div class="container-fluid">
         <mky:yield name="content"/>
     </div>
-    <footer class="alert alert-primary mt-auto">Footer layout</footer>
+    <footer class="alert alert-primary mt-auto mb-0">Footer layout</footer>
 </body>
 </html>

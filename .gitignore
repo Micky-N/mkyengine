@@ -1,4 +1,4 @@
 /vendor/
 /.idea/
-cache/views/
+*.cache.php
 /tests/report

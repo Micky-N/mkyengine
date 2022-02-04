@@ -1,3 +1,1 @@
-<div class="alert alert-dark">
-    {{ $k#currency('€') }}
-</div>
+{{ $var }}

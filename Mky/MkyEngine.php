@@ -37,10 +37,10 @@ class MkyEngine
      */
     public function __construct(array $config)
     {
-        if (empty($config['views'])) {
+        if(empty($config['views'])){
             throw new MkyEngineException("Config for views not found");
         }
-        if (empty($config['cache'])) {
+        if(empty($config['cache'])){
             $config['cache'] = __DIR__ . '/cache/views';
         }
         $this->config = $config;
@@ -96,41 +96,40 @@ class MkyEngine
      * @param array $data
      * @param bool $extends
      * @return false|string
-     * @throws MkyEngineException
      */
     public function view(string $viewName, array $data = [], $extends = false)
     {
         $viewPath = $this->getConfig('views') . '/' . $this->parseViewName($viewName);
 
-        if (!$extends) {
+        if(!$extends){
             $this->viewName = $viewName;
             $this->data = array_merge($this->data, $data);
             $this->viewPath = $viewPath;
         }
         $this->view = file_get_contents($viewPath);
-        $this->data = array_merge($this->data, $this->includeData);
         $this->parse();
+        $this->data = array_merge($this->data, $this->includeData);
 
         $cachePath = $this->getConfig('cache') . '/' . md5($this->viewName) . self::CACHE_SUFFIX;
-        if (!file_exists($cachePath)) {
+        if(!file_exists($cachePath)){
             $this->addCache($cachePath, $this->view);
-        } else if (explode("\n", file_get_contents($cachePath)) !== explode("\n", $this->view) && trim($this->view)) {
+        } else if(explode("\n", file_get_contents($cachePath)) !== explode("\n", $this->view) && trim($this->view)){
             echo '<!-- cache file updated -->';
             $this->addCache($cachePath, $this->view);
         }
 
-        if (
+        if(
             (filemtime($cachePath) < filemtime($viewPath)) ||
             (filemtime($cachePath) < filemtime($this->viewPath))
-        ) {
+        ){
             echo '<!-- cache file updated -->';
             $this->addCache($cachePath, $this->view);
         }
-        if (!$extends) {
+        if(!$extends){
             ob_start();
             extract($this->data);
             require $cachePath;
-            echo ob_get_clean();
+            return ob_get_clean();
         }
     }
 
@@ -167,13 +166,13 @@ class MkyEngine
         $this->view = preg_replace_callback(sprintf("/%s(.*?)(#(.*?)(\((.*?)\)?)?)?%s/", self::ECHO[0], self::ECHO[1]), function ($variable) {
             $var = trim($variable[1]);
             $formats = isset($variable[2]) ? explode("#", trim($variable[2])) : null;
-            if ($formats) {
+            if($formats){
                 $formats = array_filter($formats);
                 foreach ($formats as $format) {
                     $args = null;
                     $function = trim($format);
-                    if (strpos($format, '(') !== false) {
-                        preg_match('/(.*?)\((.*?)\)/', $format, $matches);
+                    if(strpos($format, '(') !== false){
+                        preg_match('/(.*?)\((.*)?\)+/', $format, $matches);
                         $args = trim($matches[2]);
                         $function = trim($matches[1]);
                     }
@@ -205,25 +204,26 @@ class MkyEngine
         $this->view = preg_replace_callback(sprintf("/%sinclude name=[\"\'](.*?)[\"\']( data=[\"\'](.*?)[\"\'])? ?%s/s", self::SINGLE_FUNCTION[0], self::SINGLE_FUNCTION[1]), function ($viewName) {
             $name = trim($viewName[1], '"\'');
             $view = file_get_contents($this->getConfig('views') . '/' . $this->parseViewName($name));
-            if (isset($viewName[3])) {
+            $data = null;
+            if(isset($viewName[3])){
                 extract($this->data);
                 preg_match_all('/\$[\w]+/', $viewName[3], $matchesVar);
                 $matchesVar = $matchesVar[0];
                 @eval("\$data = $viewName[3]; return true;");
                 foreach ($data as $key => $value) {
-                    $index = array_search($key, array_keys(array_filter($data, fn ($d) => $d === null)), true);
-                    if (is_null($value)) {
+                    $index = array_search($key, array_keys(array_filter($data, fn($d) => $d === null)), true);
+                    if(is_null($value)){
                         $view = preg_replace('/\\$' . $key . '/', $matchesVar[$index], $view);
                     } else {
                         $this->includeData[str_replace('.', '_', $name . '_' . $key)] = $value;
                     }
                 }
                 preg_match_all('/\$[\w]+/', $view, $matchesAll);
-                if ($matchesAll) {
+                if($matchesAll){
                     foreach ($matchesAll as $matches) {
                         foreach ($matches as $k => $match) {
                             $ma = str_replace('$', '', $match);
-                            if (!array_key_exists($ma, $this->data) && array_key_exists(str_replace('.', '_', $name . '_' . $ma), $this->includeData)) {
+                            if(!array_key_exists($ma, $this->data) && array_key_exists(str_replace('.', '_', $name . '_' . $ma), $this->includeData)){
                                 $view = preg_replace('/\\' . $match . '/', str_replace('.', '_', '$' . $name . '_' . $ma), $view);
                             }
                         }
@@ -313,10 +313,10 @@ class MkyEngine
     {
         $str = sprintf('/%s%s ([\w]+=[\"\'](.*?)[\"\'])+? ?%s(.*?)%s%s%s/s', self::OPEN_FUNCTION[0], $key, self::OPEN_FUNCTION[1], self::CLOSE_FUNCTION[0], $key, self::CLOSE_FUNCTION[1]);
         $this->view = preg_replace_callback($str, function ($expression) use ($mkyDirective, $key) {
-            if (isset($expression[3])) {
+            if(isset($expression[3])){
                 $xmlempty = str_replace($expression[3], '-- CODE --', $expression[0]);
             }
-
+            $var = null;
             preg_match(sprintf('/%s%s ([\w]+=[\"\'](.*?)[\"\'])+? ?%s/', self::OPEN_FUNCTION[0], $key, self::OPEN_FUNCTION[1]), $expression[0], $xmlExprUp);
             $xmlExprUp = $xmlExprUp[0];
             preg_match(sprintf('/%s%s%s/', self::CLOSE_FUNCTION[0], $key, self::CLOSE_FUNCTION[1]), $expression[0], $xmlExprDown);
@@ -326,14 +326,14 @@ class MkyEngine
             $xml = new \SimpleXMLElement($xmlExpr);
             $exprArray = [];
             foreach ($xml->attributes() as $k => $attribute) {
-                if (strpos($attribute, '$') !== false) {
+                if(strpos($attribute, '$') !== false){
                     extract($this->data);
                     @eval("\$var = $attribute; return true;");
                     $exprArray[$k] = $var;
                     self::setRealVariable((string)$attribute, $var);
                 } else {
                     $attribute = (string)$attribute;
-                    if (strpos($attribute, '/') === 0 || strpos($attribute, '.')) {
+                    if(strpos($attribute, '/') === 0 || strpos($attribute, '.')){
                         $attribute = (string)"'$attribute'";
                     }
                     @eval("\$var = $attribute; return true;");
@@ -355,8 +355,9 @@ class MkyEngine
             $xmlExpr = str_replace('mky:', '', $expression[0]);
             $xml = new \SimpleXMLElement($xmlExpr);
             $exprArray = [];
+            $var = null;
             foreach ($xml->attributes() as $k => $attribute) {
-                if (strpos($attribute, '$') !== false) {
+                if(strpos($attribute, '$') !== false){
                     extract($this->data);
                     $getvar = str_replace('$', '', $attribute);
                     @eval("\$var = $attribute; return true;");
@@ -365,7 +366,7 @@ class MkyEngine
                     self::setRealVariable((string)$attribute, $var);
                 } else {
                     $attribute = (string)$attribute;
-                    if (strpos($attribute, '/') === 0 || strpos($attribute, '.')) {
+                    if(strpos($attribute, '/') === 0 || strpos($attribute, '.')){
                         $attribute = (string)"'$attribute'";
                     }
                     @eval("\$var = $attribute; return true;");
@@ -385,10 +386,10 @@ class MkyEngine
         $start = '';
         foreach ($array as $file) {
             $start .= $file;
-            if (strpos($file, '.') !== false) {
+            if(strpos($file, '.') !== false){
                 file_put_contents($start, $view);
             } else {
-                if (!file_exists($start)) {
+                if(!file_exists($start)){
                     mkdir($start, 1);
                 }
             }

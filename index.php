@@ -11,7 +11,7 @@ $params = ['name' => $view];
 try {
     $config = include './app/config.php';
     $mkyEngine = new MkyEngine($config);
-    return $mkyEngine->view($view, $params);
+    echo $mkyEngine->view($view, $params);
 } catch (Exception $ex) {
     var_export($ex);
 }

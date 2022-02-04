@@ -34,7 +34,10 @@ class MkyDirective
     {
         foreach (self::$directives as $directive) {
             if(array_key_exists($function, $directive->getFunctions())){
-                $methodDirective = $directive->getFunctions()[$function][(int)!$open];
+                $methodDirective = $directive->getFunctions()[$function];
+                if(is_array($directive->getFunctions()[$function][0])){
+                    $methodDirective = $directive->getFunctions()[$function][(int)!$open];
+                }
                 $expression = (array)$expression;
                 $ref = new \ReflectionClass($methodDirective[0]);
                 $parameters = [];

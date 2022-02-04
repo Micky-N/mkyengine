@@ -11,12 +11,14 @@
         $o = new \stdClass();
         $o->id = 1;
         $o->name = 'Micky';
+        $arr = ['a' => 1, 'b' => 2, 'c' => 3];
     </mky:php>
-    <mky:include name="includes.foo" data="['k' => 456]"/>
+    <mky:include name="includes.foo" data="['k' => 4123]"/>
     <mky:if cond="$name == $p">
         <div class="alert alert-warning">Other Page {{ $name }}</div>
         <mky:else />
         <div class="alert alert-warning">Page {{ $name }}</div>
     </mky:if>
     {{ $btn }}
+    {{ $arr#filter(['v', 'k'], '$v > 2') }}
 </mky:section>
