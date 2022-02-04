@@ -204,7 +204,7 @@ class MkyEngine
         $this->view = preg_replace_callback(sprintf("/%sinclude name=[\"\'](.*?)[\"\']( data=[\"\'](.*?)[\"\'])? ?%s/s", self::SINGLE_FUNCTION[0], self::SINGLE_FUNCTION[1]), function ($viewName) {
             $name = trim($viewName[1], '"\'');
             $view = file_get_contents($this->getConfig('views') . '/' . $this->parseViewName($name));
-            $data = null;
+            $data = [];
             if(isset($viewName[3])){
                 extract($this->data);
                 preg_match_all('/\$[\w]+/', $viewName[3], $matchesVar);
