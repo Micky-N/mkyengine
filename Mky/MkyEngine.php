@@ -32,16 +32,17 @@ class MkyEngine
      * Mky Contructor
      * require config: views
      * optional config: cache
-     * 
+     *
      * @param array $config
      * @throws MkyEngineException
      */
     public function __construct(array $config)
     {
-        foreach (['views'] as $value) {
-            if(empty($config[$value])){
-                throw new MkyEngineException("Config $value not found");
-            }
+        if(empty($config['views'])){
+            throw new MkyEngineException("Config for views not found");
+        }
+        if(empty($config['cache'])){
+            $config['cache'] = __DIR__ . '/cache/views';
         }
         $this->config = $config;
     }
@@ -55,7 +56,7 @@ class MkyEngine
     public function addDirectives($directives)
     {
         $directives = !is_array($directives) ? [$directives] : $directives;
-        foreach ($directives as $directive){
+        foreach ($directives as $directive) {
             MkyDirective::addDirective($directive);
         }
         return $this;
@@ -70,7 +71,7 @@ class MkyEngine
     public function addFormatters($formatters)
     {
         $formatters = !is_array($formatters) ? [$formatters] : $formatters;
-        foreach ($formatters as $formatter){
+        foreach ($formatters as $formatter) {
             MkyFormatter::addFormatter($formatter);
         }
         return $this;
@@ -350,14 +351,10 @@ class MkyEngine
                 if(strpos($attribute, '$') !== false){
                     extract($this->data);
                     $getvar = str_replace('$', '', $attribute);
-                    if(array_key_exists($getvar, $this->data) || strpos($getvar, '->') !== false ||strpos($getvar, '[') !== false){
-                        @eval("\$var = $attribute; return true;");
-                        $var = is_string($var) ? "'$var'" : $var;
-                        $exprArray[$k] = $var;
-                        self::setRealVariable((string)$attribute, $var);
-                    }else{
-                        throw new MkyEngineException(sprintf('Undefined variable: %s', $attribute));
-                    }
+                    @eval("\$var = $attribute; return true;");
+                    $var = is_string($var) ? "'$var'" : $var;
+                    $exprArray[$k] = $var;
+                    self::setRealVariable((string)$attribute, $var);
                 } else {
                     $attribute = (string)$attribute;
                     if(strpos($attribute, '/') === 0 || strpos($attribute, '.')){

@@ -157,17 +157,19 @@ class BaseDirective implements MkyDirectiveInterface
 
     public function json($data)
     {
+        if(is_null($data)){
+            $data = MkyEngine::getRealVariable($data);
+            return "<?= json_encode($data) ?>";
+        }
         $data = json_encode($data);
         return $data;
     }
 
-    public function set($data)
+    public function set($key, $value = null)
     {
-        $key = $data;
         $val = '<<<HTML';
-        if(is_array($data)){
-            $key = key($data);
-            $val = is_string($data[$key]) ? "'$data[$key]'" : $data[$key];
+        if(!is_null($value)){
+            $val = is_string($value) ? "'$value'" : $value;
             $val .= ' ?>';
         }
         return "<?php \$$key = $val";
