@@ -162,9 +162,8 @@ class MkyEngine
 
     /**
      * Compile echo variables
-     * @param string|null $view
      */
-    public function parseVariables(string $view = null): void
+    public function parseVariables(): void
     {
         $this->view = preg_replace_callback(sprintf("/%s(.*?)(#(.*?)(\((.*?)\)?)?)?%s/", self::ECHO[0], self::ECHO[1]), function ($variable) {
             $var = trim($variable[1]);
@@ -184,7 +183,7 @@ class MkyEngine
                 }
             }
             return "<?= $var ?>";
-        }, $view ?? $this->view);
+        }, $this->view);
     }
 
 

@@ -12,11 +12,14 @@
     "minimum-stability": "dev",
     "autoload": {
         "psr-4": {
-            "MkyEngine\\": "Mky/"
+            "MkyEngine\\": "Mky",
+            "Tests\\": "tests"
         }
     },
-  "require": {
-    "ext-simplexml": "*",
-    "ext-json": "*"
-  }
+    "require": {
+        "ext-simplexml": "*",
+        "ext-json": "*",
+        "phpunit/phpunit": "9.5.x-dev",
+        "phpunit/php-code-coverage": "9.2.x-dev"
+    }
 }
