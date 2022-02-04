@@ -87,7 +87,6 @@ class MkyEngine
      * @param array $data
      * @param bool $extends
      * @return false|string
-     * @throws Exception
      */
     public function view(string $viewName, array $data = [], $extends = false)
     {
