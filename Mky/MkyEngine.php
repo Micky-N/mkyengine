@@ -5,7 +5,6 @@ namespace MkyEngine;
 use MkyEngine\Interfaces\MkyDirectiveInterface;
 use MkyEngine\Interfaces\MkyFormatterInterface;
 use MkyEngine\Exceptions\MkyEngineException;
-use MkyEngine\MkyDirectives\Directive;
 
 class MkyEngine
 {
