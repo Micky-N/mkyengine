@@ -1,5 +1,7 @@
 <mky:extends name="layouts.template"/>
 
+<mky:section name="title" value="Test Mky"/>
+
 <mky:section name="content">
     <mky:set key="p" value="index"/>
     <mky:set key="m">
