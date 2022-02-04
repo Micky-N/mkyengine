@@ -10,9 +10,7 @@
         $o->id = 1;
         $o->name = 'Micky';
     </mky:php>
-    <div class="alert alert-dark">
-        <mky:json data="$o" />
-    </div>
+    <mky:include name="includes.foo" data="['k' => 456]"/>
     <mky:if cond="$name == $p">
         <div class="alert alert-warning">Other Page {{ $name }}</div>
         <mky:else />

@@ -47,7 +47,7 @@ class MkyDirective
                         $parameters[$reflectionParameter->name] = null;
                     }
                 }
-                return $refMethod = $ref->getMethod($methodDirective[1])->invokeArgs($ref->newInstance(), $parameters);
+                return $ref->getMethod($methodDirective[1])->invokeArgs($ref->newInstance(), $parameters);
             }
         }
         return $expression;

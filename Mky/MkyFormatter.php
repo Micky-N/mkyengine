@@ -11,7 +11,7 @@ use MkyEngine\MkyFormatters\BaseFormatter;
 class MkyFormatter
 {
     /**
-     * @var string[]
+     * @var MkyFormatterInterface[]
      */
     private static array $formatters = [];
 

@@ -1,0 +1,3 @@
+<div class="alert alert-dark">
+    {{ $k#currency('e')#uppercase#currency('e') }}
+</div>
