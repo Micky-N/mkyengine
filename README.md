@@ -27,9 +27,9 @@ le nom des $view s'écrit avec un point `todos.index`: dossier /chemin_des_vues/
 Exemple avec la directive "if":
 ```html
 <mky:if cond="$todo->task == 'Coder'">
-	<div>true</div>
-	<mky:else />
-	<div>false</div>
+    <div>true</div>
+    <mky:else />
+    <div>false</div>
 </mky:if>
 ```
 Si la condition est vrai alors il affichera le texte true sinon false, il existe 2 types de directives : longue portée et courte portée. Les longues portées englobe le code html pour le transformer, ex: if, each, repeat... ils s'écrivent 
