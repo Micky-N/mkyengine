@@ -114,7 +114,6 @@ class MkyEngine
         if(!file_exists($cachePath)){
             $this->addCache($cachePath, $this->view);
         } else if(explode("\n", file_get_contents($cachePath)) !== explode("\n", $this->view) && trim($this->view)){
-            echo '<!-- cache file updated -->';
             $this->addCache($cachePath, $this->view);
         }
 
@@ -122,7 +121,6 @@ class MkyEngine
             (filemtime($cachePath) < filemtime($viewPath)) ||
             (filemtime($cachePath) < filemtime($this->viewPath))
         ){
-            echo '<!-- cache file updated -->';
             $this->addCache($cachePath, $this->view);
         }
         if(!$extends){
