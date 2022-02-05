@@ -87,7 +87,7 @@ route: courte
 set: courte si value, sinon longue
 php: longue
 ```
-Pour créer des directives, déclarer une classe qui implémente l'interface Core\Interfaces\MkyDirectiveInterface et étendre de la classe Core\MkyCompiler\MkyDirectives\Directive. Pour ajouter un ou plusieurs directives, utiliser la méthode 
+Pour créer des directives, déclarer une classe qui implémente l'interface Core\Interfaces\MkyDirectiveInterface et étendre de la classe Core\MkyCompiler\MkyDirectives\Directive. Pour ajouter un ou plusieurs directives, utiliser la méthode\
 `$mkyEngine->addDirectives(new TestDirective()) ou $mkyEngine->addDirectives([new TestDirective(), new OtherDirective()])` 
 ```php
 class TestDirective extends Directive implements MkyDirectiveInterface  
@@ -124,7 +124,7 @@ class TestDirective extends Directive implements MkyDirectiveInterface
 Les formatters permettent de modifier les variables php dans la vues et s'ecrivent avec un # devant la variable 
 `{{ $var#euro }}`,
 si le formatter 'euro' permet de mettre un chiffre en format devise en euro alors si  $var = 5 alors `$var#euro => 5,00 €`.
-Pour créer des formatters, déclarer une classe qui implémente Core\Interfaces\MkyFormatterInterface. Pour ajouter un ou plusieurs formatters, utiliser la méthode 
+Pour créer des formatters, déclarer une classe qui implémente Core\Interfaces\MkyFormatterInterface. Pour ajouter un ou plusieurs formatters, utiliser la méthode\
 `$mkyEngine->addFormatters(new ArrayFormatter()) ou $mkyEngine->addFormatters([new ArrayFormatter(), new OtherFormatter()])` 
 
 ```php
