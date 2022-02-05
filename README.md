@@ -6,6 +6,10 @@
 
 Inspirée de Jsp (java), le moteur de template utilise des balises `<mky/>` pour générer le code php sur la vue.
 
+### Installation
+
+`composer require mky/mky-engine`
+
 ### Configuration
 
 La configuration doit être sous forme de tableau avec le chemin des vues et celui du cache qui servira de sauvegarde pour les vues compilées
