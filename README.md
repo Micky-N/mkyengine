@@ -2,7 +2,7 @@
   
 > *Moteur de template php par Micky-N* 
 
-[![Generic badge](https://img.shields.io/badge/mky-master-orange.svg)](https://shields.io/) [![Generic badge](https://img.shields.io/badge/version-0.1.0-green.svg)](https://shields.io/)
+[![Generic badge](https://img.shields.io/badge/mky-master-orange.svg)](https://shields.io/) [![Generic badge](https://img.shields.io/badge/version-1.0.1-green.svg)](https://shields.io/)
 
 Inspirée de Jsp (java), le moteur de template utilise des balises `<mky/>` pour générer le code php sur la vue.
 
