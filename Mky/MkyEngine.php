@@ -359,7 +359,6 @@ class MkyEngine
             foreach ($xml->attributes() as $k => $attribute) {
                 if(strpos($attribute, '$') !== false){
                     extract($this->data);
-                    $getvar = str_replace('$', '', $attribute);
                     @eval("\$var = $attribute; return true;");
                     $var = is_string($var) ? "'$var'" : $var;
                     $exprArray[$k] = $var;

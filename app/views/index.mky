@@ -20,5 +20,4 @@
         <div class="alert alert-warning">Page {{ $name }}</div>
     </mky:if>
     {{ $btn }}
-    {{ $arr#filter(['v', 'k'], '$v > 2') }}
 </mky:section>
