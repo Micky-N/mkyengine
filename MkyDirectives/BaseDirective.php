@@ -110,15 +110,17 @@ class BaseDirective implements MkyDirectiveInterface
         return '<?php endforeach; ?>';
     }
 
-    public function repeat($loop, string $as = null, string $key = null)
+    public function repeat(int $for, int $step = 1, string $key = null)
     {
-        $loop = 'range(0, ' . ($loop - 1) . ') as ' . ($key ? "\$$key => " : '') . ($as ? "\$$as" : '$index');
-        return "<?php foreach($loop): ?>";
+        if(empty($key)){
+            $key = '\$i';
+        }
+        return "<?php for($key = 0; $key < $for; $key+= $step): ?>";
     }
 
     public function endrepeat()
     {
-        return '<?php endforeach; ?>';
+        return '<?php endfor; ?>';
     }
 
     public function switch($cond)
