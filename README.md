@@ -1,34 +1,36 @@
-# Mky Template Engine  
+# MkyEngine  
   
-> *Moteur de template php par Micky-N* 
+> *Php template engine by Micky-N* 
 
-[![Generic badge](https://img.shields.io/badge/mky-master-orange.svg)](https://shields.io/) [![Generic badge](https://img.shields.io/badge/version-1.0.1-green.svg)](https://shields.io/)
+[![Generic badge](https://img.shields.io/badge/mky-master-orange.svg)](https://shields.io/) [![Generic badge](https://img.shields.io/badge/version-1.0.0-green.svg)](https://shields.io/)
 
-Inspirée de Jsp (java), le moteur de template utilise des balises `<mky/>` pour générer le code php sur la vue.
+The template engine uses `<mky/>` tags to generate php code on the view.
 
 ### Installation
 
-`composer require mky/mky-engine`
+`composer require micky/mky-engine`
 
 ### Configuration
 
-La configuration doit être sous forme de tableau avec le chemin des vues et celui du cache qui servira de sauvegarde pour les vues compilées
+The configuration must have the views, templates and includes directory and cache directory which will serve as a backup for  compiled views
 ```php
 $config = [
-    'views' => 'chemin des vues',
-    'cache' => 'chemin du cache' // optionnel
+    'views' => 'views directory',
+	'layouts' => 'layouts directory', // optional, if not layouts dir = views dir
+	'includes' => 'includes directory', // optional, if not includes dir = views dir
+    'cache' => 'cache directory' // optional
 ]
 ```
-cette configuration est l'argument du constructeur de la classe MkyEngine
+this configuration is the constructor argument of the \MkyEngine\MkyEngine class
 ```php
-$mkyEngine = new Mky\MkyEngine($config);
+$mkyEngine = new \MkyEngine\MkyEngine($config);
 ```
-pour afficher une vue utiliser la méthode `$mkyEngine->view($view, $params)`
-le nom des $view s'écrit avec un point `todos.index`: dossier /chemin_des_vues/todos/index.mky et les variables passées en tableau `['todo' => valeur]`.
+To see view file in browser `echo $mkyEngine->view($view, $params)`,  $view path are written with point 
+ `todos.index` from config point : config_views/todos/index.mky and variables are pass as array `['todo' => value]`.
 
 ### MkyDirective
 
-Exemple avec la directive "if":
+Example with "if" directive:
 ```html
 <mky:if cond="$todo->task == 'Coder'">
     <div>true</div>
@@ -36,13 +38,10 @@ Exemple avec la directive "if":
     <div>false</div>
 </mky:if>
 ```
-Si la condition est vrai alors il affichera le texte true sinon false, il existe 2 types de directives : longue portée et courte portée. Les longues portées englobe le code html pour le transformer, ex: if, each, repeat... ils s'écrivent 
-`<mky:directive params="">...html...</mky:directive>` 
-et les courtes portées affichent un resultat ex: route, json, ... et s'écrivent
-`<mky:directive params="" />` 
-pour les paramètres les guillemets ne sont pas obligatoire.
+If the condition is true then it will display the text "true" otherwise "false", there are 2 types of directives: long range and short range. Long range directive includes an html code to transform it, ex: if, each, repeat... they are written
+`<mky:directive params="">...html...</mky:directive>` and the short ranges display a result ex: json, and are written `<mky:directive params="" />`.
 
-les vues .mky utilisent le système d'**extends**, **yield** et **sections**, avec la directive **include** la vue peut intégrer d'autres vues, les vue inclues héritent des variables des parents et peuvent recevoir des variables personnalisées.
+*.mky views use the system of **extends**, **yield** and **sections**. With the **include** directive a view can integrate other views, included views inherit parents variables and can receive custom variables.
 ```html
 // views/layouts/template.mky
 -- HEADER HTML --
@@ -58,62 +57,72 @@ les vues .mky utilisent le système d'**extends**, **yield** et **sections**, av
 </mky:section>
 ```
 
-la directive yield peut avoir une valeur par défaut grâce au paramètre value `<mky:yield name="title" value="Home"/>` et section peut devenir une directive courte en rajoutant
-le paramètre value `<mky:section name="title" value="TodoPage"/>` 
+the yield directive can have a default value with the default parameter `<mky:yield name="title" default="HomePage"/>` and section can become a short directive by adding the value parameter\
+ `<mky:section name="title" value="TodoPage"/>`
 
 
-### Liste des directives
+#### List of directives
 
 ```yaml
-assets: courte
-script: court si src, sinon longue
-style: court si href, sinon longue
-if: longue
-elseif: courte
-else: courte
-each: longue
-repeat: longue
-switch: longue
-case: courte
-break: courte
-default: courte
-dump: courte
-permission: longue
-notpermission: longue
-auth: longue
-json: courte
-currentRoute: longue
-route: courte
-set: courte si value, sinon longue
-php: longue
+script(src: null|string): short if src not null, otherwise long
+// get js file or write js script
+
+style(href: null|string): short if href not null, otherwise long
+// get css file or write css
+
+
+if(cond: bool): long
+elseif(cond: bool): short
+else: short
+// if condition
+
+each(loop: array, as: string|null, key: string|null): long
+// foreach loop
+
+repeat(for: int, step: int|null, key: string|null): long
+// for loop
+
+switch(cond: mixed): long
+case(case: mixed): short
+break: short
+default: short
+// switch condition
+
+set(key: string, value: mixed|null): short if value not null, otherwise long
+// set value for a new variable php ex: <mky:set key="k" value="5"/> => $k = 5
+// or set('k', 'value') <mky:set key="k">--HTML--<mky:set/> => $k = --HTML--
+
+php: long
+// write php code in template
 ```
-Pour créer des directives, déclarer une classe qui implémente l'interface Core\Interfaces\MkyDirectiveInterface et étendre de la classe Core\MkyCompiler\MkyDirectives\Directive. Pour ajouter un ou plusieurs directives, utiliser la méthode\
-`$mkyEngine->addDirectives(new TestDirective()) ou $mkyEngine->addDirectives([new TestDirective(), new OtherDirective()])` 
+To create directives, create a class that implements the \MkyEngine\Interfaces\MkyDirectiveInterface interface and use the "addDirectives" method to add one or multiple directives\
+`$mkyEngine->addDirectives(new TestDirective()) or $mkyEngine->addDirectives([new TestDirective(), new OtherDirective()])` 
+
 ```php
-class TestDirective extends Directive implements MkyDirectiveInterface  
+class TestDirective implements MkyDirectiveInterface  
 {  
   
     public function getFunctions()  
     {  
-        // déclarer les fonctions dans le tableau
+        // set function in the return array like:
         return [  
-            'shortTest' => [$this, 'shortTest'], // pour les courtes directives
-            'longTest' => [[$this, 'longTest'], [$this, 'endlongTest']] // pour les longues directives
+            'shortTest' => [$this, 'shortTest'], // for short directive
+            'longTest' => [[$this, 'longTest'], [$this, 'endlongTest']] // for long directive
         ];  
     }  
     
-    // implémenter les fonctions
+    // implement the functions
     public function shortTest($int)  
     {  
         // $var = 10;
-	    // dans la vue: <div><mky:shortTest int="$var"/></div>
-	    // devient <div>$var = 15 (10 + 5)</div>
-	    // pour récuperer le nom de la variable passée en paramètres: $this->getRealVariable($int) => $var
+	    // in the view: <div><mky:shortTest int="$var"/></div>
+	    // become <div>$var = 15 (10 + 5)</div>
+	    // to get the variable name: $this->getRealVariable($int) => $var
         return sprintf('%s = %s (%s + 5)', $this->getRealVariable($int), $int + 5, $int);  
     }
 
     // <mky:longTest cls="customClass">-- HTML --</mky:longTest>
-    // devient <div class="customClass">-- HTML --</div>
+    // become <div class="customClass">-- HTML --</div>
     public function longTest($cls)  { return '<div class="'.$cls.'">'; }
     public function endlongTest()   { return '</div>'; }
 }
@@ -121,11 +130,11 @@ class TestDirective extends Directive implements MkyDirectiveInterface
 
 ### MkyFormatter
 
-Les formatters permettent de modifier les variables php dans la vues et s'ecrivent avec un # devant la variable 
-`{{ $var#euro }}`,
-si le formatter 'euro' permet de mettre un chiffre en format devise en euro alors si  $var = 5 alors `$var#euro => 5,00 €`.
-Pour créer des formatters, déclarer une classe qui implémente Core\Interfaces\MkyFormatterInterface. Pour ajouter un ou plusieurs formatters, utiliser la méthode\
-`$mkyEngine->addFormatters(new ArrayFormatter()) ou $mkyEngine->addFormatters([new ArrayFormatter(), new OtherFormatter()])` 
+The formatters can change the php variables in the views and are written with a "#" on the right of the variable
+`{{ $var#currency }}`, the 'currency' formatter allows to change variable to a currency format, by default is euro "€" then 
+if $var = 5 then `$var#currency => 5,00 €`.
+To create formatters, create a class that implements \MkyEngine\Interfaces\MkyFormatterInterface interface, use the "addFormatters" method to add one or multiple formatters\
+`$mkyEngine->addFormatters(new ArrayFormatter()) or $mkyEngine->addFormatters([new ArrayFormatter(), new OtherFormatter()])`
 
 ```php
 class ArrayFormatter implements MkyFormatterInterface  
@@ -133,14 +142,14 @@ class ArrayFormatter implements MkyFormatterInterface
   
     public function getFormats()  
     {  
-        // déclarer le fonctions dans le tableau
+        // set function in the return array like:
         return [  
             'join' => [$this, 'join'],  
             'count' => [$this, 'count']  
         ];  
     }  
   
-    // implémenter les fonctions
+    // implement the functions
     public function join(array $array, string $glue = ', ')  
     {  
 	    // $var = [1,5,3]; {{ $var#join('!') }} => 1!5!3
@@ -154,6 +163,20 @@ class ArrayFormatter implements MkyFormatterInterface
     }  
 }
 ```
-les formatters peuvent s'enchainer à la suite `{{ $name#format1 #format2 }}`
+Formatters can be chained as `{{ $name #format1 #format2 }}`
 
-Merci pour votre lecture, pour m'aider à améliorer ce package faite des Issues !
+#### List of formatters
+
+```yaml
+currency: value to currency, params: string currency (default: 'EUR'), string locale (default: 'fr_FR'),  
+uppercase: value to uppercase,  
+lowercase: value to lowercase,  
+firstCapitalize: uppercase first letter,  
+join: array to string, param: string separator (default: ', '),  
+count: get the number of elements in the array,  
+dateformat: set date to format, param: string format (default:'Y-m-d H:i:s')
+```
+<hr>
+For help me to improve this package made of issues!
+
+For see tests: `composer require micky/mky-engine:dev-test`
