@@ -12,7 +12,6 @@ class BaseDirective implements MkyDirectiveInterface
     private static array $conditions = [
         'firstCaseSwitch' => false
     ];
-    private array $sections = [];
 
     public function getFunctions()
     {
