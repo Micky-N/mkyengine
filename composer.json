@@ -1,27 +1,26 @@
 {
-  "name": "micky/mky",
-  "description": "Mky Template Engine",
-  "type": "library",
-  "license": "MIT",
-  "authors": [
-    {
-      "name": "Ndinga Mickael",
-      "email": "ndingamickael@gmail.com"
+    "name": "micky/mky",
+    "description": "Mky Template Engine",
+    "type": "library",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Ndinga Mickael",
+            "email": "ndingamickael@gmail.com"
+        }
+    ],
+    "minimum-stability": "dev",
+    "autoload": {
+        "psr-4": {
+            "MkyEngine\\": "Mky",
+            "Tests\\": "tests"
+        }
+    },
+    "require": {
+        "ext-json": "*",
+        "phpunit/phpunit": "9.5.x-dev",
+        "phpunit/php-code-coverage": "9.2.x-dev",
+        "ext-intl": "*",
+        "ext-xdebug": "*"
     }
-  ],
-  "minimum-stability": "dev",
-  "autoload": {
-    "psr-4": {
-      "MkyEngine\\": "Mky",
-      "Tests\\": "tests"
-    }
-  },
-  "require": {
-    "ext-simplexml": "*",
-    "ext-json": "*",
-    "phpunit/phpunit": "9.5.x-dev",
-    "phpunit/php-code-coverage": "9.2.x-dev",
-    "ext-intl": "*",
-    "ext-xdebug": "*"
-  }
 }

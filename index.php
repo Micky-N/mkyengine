@@ -6,7 +6,7 @@ use MkyEngine\MkyEngine;
 require './vendor/autoload.php';
 
 $view = 'index';
-$params = ['name' => $view];
+$params = ['name' => $view, 'd' => new DateTime()];
 
 try {
     $config = include './app/config.php';
