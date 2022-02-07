@@ -3,10 +3,12 @@
     "description": "Template engine for php with tag",
     "type": "library",
     "license": "MIT",
-    "authors": [{
-        "name": "Mickael Ndinga",
-        "email": "ndingamickael@gmail.com"
-    }],
+    "authors": [
+        {
+            "name": "Mickael Ndinga",
+            "email": "ndingamickael@gmail.com"
+        }
+    ],
     "minimum-stability": "dev",
     "autoload": {
         "psr-4": {
@@ -14,6 +16,8 @@
         }
     },
     "require": {
-        "php": ">=7.4"
+        "php": ">=7.4",
+        "ext-json": "*",
+        "ext-intl": "*"
     }
 }
