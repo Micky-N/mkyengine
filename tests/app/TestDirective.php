@@ -1,7 +1,7 @@
 <?php
 
 
-namespace Tests\app;
+namespace MkyEngine\Tests\App;
 
 
 class TestDirective implements \MkyEngine\Interfaces\MkyDirectiveInterface

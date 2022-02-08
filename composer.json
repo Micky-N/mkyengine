@@ -1,26 +1,40 @@
 {
-    "name": "micky/mky",
-    "description": "Mky Template Engine",
+    "name": "micky/mky-engine",
+    "description": "Template engine for php with tag",
+    "keywords": ["template", "engine"],
     "type": "library",
     "license": "MIT",
     "authors": [
         {
-            "name": "Ndinga Mickael",
+            "name": "Mickael Ndinga",
             "email": "ndingamickael@gmail.com"
         }
     ],
+    "prefer-stable": true,
     "minimum-stability": "dev",
     "autoload": {
         "psr-4": {
-            "MkyEngine\\": "Mky",
-            "Tests\\": "tests"
+            "MkyEngine\\": "src/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "MkyEngine\\Tests\\": "tests/"
         }
     },
     "require": {
+        "php": ">=7.4",
         "ext-json": "*",
-        "phpunit/phpunit": "9.5.x-dev",
-        "phpunit/php-code-coverage": "9.2.x-dev",
         "ext-intl": "*",
-        "ext-xdebug": "*"
+        "ext-simplexml": "*"
+    },
+    "require-dev": {
+        "phpunit/phpunit": "9.5.x-dev",
+        "phpunit/php-code-coverage": "9.2.x-dev"
+    },
+    "extra": {
+        "branch-alias": {
+            "dev-master": "1.x-dev"
+        }
     }
 }

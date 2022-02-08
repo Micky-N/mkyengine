@@ -1,11 +1,11 @@
 <?php
 
-namespace Tests;
+namespace MkyEngine\Tests;
 
 use MkyEngine\MkyEngine;
 use PHPUnit\Framework\TestCase;
-use Tests\app\TestDirective;
-use Tests\app\TestFormatter;
+use MkyEngine\Tests\App\TestDirective;
+use MkyEngine\Tests\App\TestFormatter;
 
 class MkyEngineTest extends TestCase
 {
@@ -23,18 +23,10 @@ class MkyEngineTest extends TestCase
         $this->mkyEngine = new MkyEngine($config);
     }
 
-    private function invokeMethod(&$object, $methodName, array $parameters = array())
-    {
-        $reflection = new \ReflectionClass(get_class($object));
-        $method = $reflection->getMethod($methodName);
-        $method->setAccessible(true);
-        return $method->invokeArgs($object, $parameters);
-    }
-
     public function testConfig()
     {
-        $views = self::invokeMethod($this->mkyEngine, 'getConfig', ['views']);
-        $cache = self::invokeMethod($this->mkyEngine, 'getConfig', ['cache']);
+        $views = $this->mkyEngine->getConfig('views');
+        $cache = $this->mkyEngine->getConfig('cache');
 
         $this->assertEquals(__DIR__ . '/app/views', $views);
         $this->assertEquals(__DIR__ . '/app/cache/views', $cache);
@@ -42,7 +34,7 @@ class MkyEngineTest extends TestCase
 
     public function testViewsCacheFound()
     {
-        $cacheFile = self::invokeMethod($this->mkyEngine, 'getConfig', ['cache']);
+        $cacheFile = $this->mkyEngine->getConfig('cache');
         $cacheFile .= '/' . md5('emptyView') . '.cache.php';
         $this->mkyEngine->view('emptyView');
         $this->assertTrue(file_exists($cacheFile));
@@ -50,7 +42,7 @@ class MkyEngineTest extends TestCase
 
     public function testNotEmptyCacheFile()
     {
-        $cacheFile = self::invokeMethod($this->mkyEngine, 'getConfig', ['cache']);
+        $cacheFile = $this->mkyEngine->getConfig('cache');
         $cacheFile .= '/' . md5('notEmptyView') . '.cache.php';
         $this->mkyEngine->view('notEmptyView');
         $this->assertEquals(5, file_get_contents($cacheFile));

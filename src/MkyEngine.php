@@ -40,6 +40,12 @@ class MkyEngine
         if(empty($config['views'])){
             throw new MkyEngineException("Config for views not found");
         }
+        if(empty($config['includes'])){
+            $config['includes'] = $config['views'];
+        }
+        if(empty($config['layouts'])){
+            $config['layouts'] = $config['views'];
+        }
         if(empty($config['cache'])){
             $config['cache'] = __DIR__ . '/cache/views';
         }
@@ -99,9 +105,9 @@ class MkyEngine
      */
     public function view(string $viewName, array $data = [], $extends = false)
     {
-        $viewPath = $this->getConfig('views') . '/' . $this->parseViewName($viewName);
-
+        $viewPath = $this->config['layouts'] . '/' . $this->parseViewName($viewName);
         if(!$extends){
+            $viewPath = $this->config['views'] . '/' . $this->parseViewName($viewName);
             $this->viewName = $viewName;
             $this->data = array_merge($this->data, $data);
             $this->viewPath = $viewPath;
@@ -110,11 +116,10 @@ class MkyEngine
         $this->parse();
         $this->data = array_merge($this->data, $this->includeData);
 
-        $cachePath = $this->getConfig('cache') . '/' . md5($this->viewName) . self::CACHE_SUFFIX;
+        $cachePath = $this->config['cache'] . '/' . md5($this->viewName) . self::CACHE_SUFFIX;
         if(!file_exists($cachePath)){
             $this->addCache($cachePath, $this->view);
         } else if(explode("\n", file_get_contents($cachePath)) !== explode("\n", $this->view) && trim($this->view)){
-            echo '<!-- cache file updated -->';
             $this->addCache($cachePath, $this->view);
         }
 
@@ -122,13 +127,14 @@ class MkyEngine
             (filemtime($cachePath) < filemtime($viewPath)) ||
             (filemtime($cachePath) < filemtime($this->viewPath))
         ){
-            echo '<!-- cache file updated -->';
             $this->addCache($cachePath, $this->view);
         }
         if(!$extends){
             ob_start();
             extract($this->data);
-            require $cachePath;
+            if(file_exists($cachePath)){
+                require $cachePath;
+            }
             return ob_get_clean();
         }
     }
@@ -184,18 +190,6 @@ class MkyEngine
         }, $this->view);
     }
 
-
-    /**
-     * Get config value
-     *
-     * @param string $key
-     * @return mixed
-     */
-    private function getConfig(string $key)
-    {
-        return $this->config[$key] ?? null;
-    }
-
     /**
      * Compile included files
      */
@@ -203,7 +197,7 @@ class MkyEngine
     {
         $this->view = preg_replace_callback(sprintf("/%sinclude name=[\"\'](.*?)[\"\']( data=[\"\'](.*?)[\"\'])? ?%s/s", self::SINGLE_FUNCTION[0], self::SINGLE_FUNCTION[1]), function ($viewName) {
             $name = trim($viewName[1], '"\'');
-            $view = file_get_contents($this->getConfig('views') . '/' . $this->parseViewName($name));
+            $view = file_get_contents($this->config['includes'] . '/' . $this->parseViewName($name));
             $data = [];
             if(isset($viewName[3])){
                 extract($this->data);
@@ -406,5 +400,14 @@ class MkyEngine
     public static function setRealVariable($variable, $value)
     {
         self::$variables[$variable] = $value;
+    }
+
+    public function getConfig(string $key = null)
+    {
+        $config = $this->config;
+        if(!is_null($key) && isset($this->config[$key])){
+            $config = $this->config[$key];
+        }
+        return $config;
     }
 }

@@ -1,7 +1,7 @@
 <?php
 
 
-namespace Tests\app;
+namespace MkyEngine\Tests\App;
 
 
 class TestFormatter implements \MkyEngine\Interfaces\MkyFormatterInterface

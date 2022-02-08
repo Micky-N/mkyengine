@@ -21,7 +21,7 @@ class BaseFormatter implements MkyFormatterInterface
             'firstCapitalize' => [$this, 'firstCapitalize'],
             'join' => [$this, 'join'],
             'count' => [$this, 'count'],
-            'date' => [$this, 'date']
+            'dateformat' => [$this, 'dateformat']
         ];
     }
 
@@ -62,7 +62,7 @@ class BaseFormatter implements MkyFormatterInterface
      * @return string
      * @throws Exception
      */
-    public function date($dateTime, string $format = 'Y-m-d H:i:s'): string
+    public function dateformat($dateTime, string $format = 'Y-m-d H:i:s'): string
     {
         if(is_string($dateTime)){
             $dateTime = new DateTime($dateTime);
