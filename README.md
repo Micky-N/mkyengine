@@ -179,4 +179,4 @@ dateformat: set date to format, param: string format (default:'Y-m-d H:i:s')
 <hr>
 For help me to improve this package made of issues!
 
-For see tests: `composer require micky/mky-engine:dev-test`
+For see tests: `composer require --dev micky/mky-engine`
