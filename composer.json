@@ -10,6 +10,7 @@
         }
     ],
     "prefer-stable": true,
+    "minimum-stability": "stable",
     "autoload": {
         "psr-4": {
             "MkyEngine\\": "/"
