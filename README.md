@@ -2,13 +2,15 @@
   
 > *Php template engine by Micky-N* 
 
-[![Generic badge](https://img.shields.io/badge/mky-master-orange.svg)](https://shields.io/) [![Generic badge](https://img.shields.io/badge/version-1.0.0-green.svg)](https://shields.io/)
+[![Generic badge](https://img.shields.io/badge/release-1.0.0-blue.svg)](https://shields.io/) [![Generic badge](https://img.shields.io/badge/coverage-100%25-green.svg)](https://shields.io/) [![Generic badge](https://img.shields.io/badge/licence-MIT-1abc9c.svg)](https://shields.io/)
 
 The template engine uses `<mky/>` tags to generate php code on the view.
 
-### Installation
+## Installation
 
 `composer require micky/mky-engine`
+
+## Usage
 
 ### Configuration
 
@@ -176,7 +178,15 @@ join: array to string, param: string separator (default: ', '),
 count: get the number of elements in the array,  
 dateformat: set date to format, param: string format (default:'Y-m-d H:i:s')
 ```
-<hr>
-For help me to improve this package made of issues!
 
-For see tests: `composer require --dev micky/mky-engine`
+## Tests
+
+To execute the test suite, you'll need to install all development dependencies.
+```shell
+$ git clone https://github.com/Micky-N/MkyEngine
+$ composer install
+```
+
+## Licence
+
+MIT
