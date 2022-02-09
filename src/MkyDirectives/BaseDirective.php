@@ -113,7 +113,7 @@ class BaseDirective implements MkyDirectiveInterface
     public function repeat(int $for, int $step = 1, string $key = null)
     {
         if(empty($key)){
-            $key = '\$i';
+            $key = '$i';
         }
         return "<?php for($key = 0; $key < $for; $key+= $step): ?>";
     }
