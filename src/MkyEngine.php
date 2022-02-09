@@ -354,7 +354,6 @@ class MkyEngine
                 if(strpos($attribute, '$') !== false){
                     extract($this->data);
                     @eval("\$var = $attribute; return true;");
-                    $var = is_string($var) ? "'$var'" : $var;
                     $exprArray[$k] = $var;
                     self::setRealVariable((string)$attribute, $var);
                 } else {
