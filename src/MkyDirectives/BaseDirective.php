@@ -170,8 +170,7 @@ class BaseDirective implements MkyDirectiveInterface
     {
         $val = '<<<HTML';
         if(!is_null($value)){
-            $val = is_string($value) ? "'$value'" : $value;
-            $val .= ' ?>';
+            $val = $value . ' ?>';
         }
         return "<?php \$$key = $val";
     }
