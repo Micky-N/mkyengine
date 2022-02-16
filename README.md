@@ -1,6 +1,6 @@
 # MkyEngine  
   
-> *Php template engine by Micky-N* 
+> *PHP template engine by Micky-N* 
 
 [![Generic badge](https://img.shields.io/badge/release-1.0.0-blue.svg)](https://shields.io/) [![Generic badge](https://img.shields.io/badge/coverage-100%25-green.svg)](https://shields.io/) [![Generic badge](https://img.shields.io/badge/licence-MIT-1abc9c.svg)](https://shields.io/)
 

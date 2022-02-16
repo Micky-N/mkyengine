@@ -1,12 +1,12 @@
 {
-    "name": "micky/mky-engine",
-    "description": "Template engine for php with tag",
+    "name": "micky/mkyengine",
+    "description": "PHP template engine with tag",
     "keywords": ["template", "engine"],
     "type": "library",
     "license": "MIT",
     "authors": [
         {
-            "name": "Mickael Ndinga",
+            "name": "Mickaël Ndinga",
             "email": "ndingamickael@gmail.com"
         }
     ],
