@@ -1,7 +1,7 @@
 {
     "name": "micky/mkyengine",
     "description": "PHP template engine with tag",
-    "keywords": ["template", "engine"],
+    "keywords": ["template", "engine", "micky"],
     "type": "library",
     "license": "MIT",
     "authors": [
