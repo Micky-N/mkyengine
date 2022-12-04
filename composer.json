@@ -1,7 +1,7 @@
 {
     "name": "micky/mkyengine",
     "description": "PHP template engine with tag",
-    "keywords": ["template", "engine", "micky"],
+    "keywords": ["template", "engine", "micky", "php"],
     "type": "library",
     "license": "MIT",
     "authors": [
@@ -23,7 +23,7 @@
         }
     },
     "require": {
-        "php": ">=7.4",
+        "php": ">=8.0",
         "ext-json": "*",
         "ext-intl": "*",
         "ext-simplexml": "*"

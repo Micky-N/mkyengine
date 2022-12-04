@@ -1,4 +1,6 @@
-<mky:set key="p" value="index"/>
+<mky:php>
+$p = 'index';
+</mky:php>
 <mky:if cond="$name == 'false'">
 If Page {{ $name }}
 <mky:else />
