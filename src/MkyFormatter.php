@@ -19,14 +19,14 @@ class MkyFormatter
         self::$formatters[] = new BaseFormatter();
     }
 
-    public static function addFormatter(MkyFormatterInterface $formatter)
+    public static function addFormatter(MkyFormatterInterface $formatter): void
     {
         self::$formatters[] = $formatter;
     }
 
-    public function callFormat(string $format, $variable, $params = null)
+    public function callFormat(string $format, mixed $variable, mixed $params = null): mixed
     {
-        $params = !is_array($params) ? [$params] : $params;
+        $params = (array) $params;
         foreach (self::$formatters as $formatter) {
             if(array_key_exists($format, $formatter->getFormats())){
                 return call_user_func_array($formatter->getFormats()[$format], [$variable, ...$params]);

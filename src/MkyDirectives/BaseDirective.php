@@ -29,7 +29,6 @@ class BaseDirective implements MkyDirectiveInterface
             'default' => [$this, 'default'],
             'json' => [$this, 'json'],
             'php' => [[$this, 'php'], [$this, 'endphp']],
-            'set' => [[$this, 'set'], [$this, 'endset']],
         ];
     }
 
@@ -164,15 +163,6 @@ class BaseDirective implements MkyDirectiveInterface
         }
         $data = json_encode($data);
         return $data;
-    }
-
-    public function set($key, $value = null)
-    {
-        $val = '<<<HTML';
-        if(!is_null($value)){
-            $val = $value . ' ?>';
-        }
-        return "<?php \$$key = $val";
     }
 
     public function endset()

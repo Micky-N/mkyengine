@@ -18,8 +18,6 @@ The configuration must have the views, templates and includes directory and cach
 ```php
 $config = [
     'views' => 'views directory',
-	'layouts' => 'layouts directory', // optional, if not layouts dir = views dir
-	'includes' => 'includes directory', // optional, if not includes dir = views dir
     'cache' => 'cache directory' // optional
 ]
 ```
@@ -89,10 +87,6 @@ case(case: mixed): short
 break: short
 default: short
 // switch condition
-
-set(key: string, value: mixed|null): short if value not null, otherwise long
-// set value for a new variable php ex: <mky:set key="k" value="5"/> => $k = 5
-// or set('k', 'value') <mky:set key="k">--HTML--<mky:set/> => $k = --HTML--
 
 php: long
 // write php code in template

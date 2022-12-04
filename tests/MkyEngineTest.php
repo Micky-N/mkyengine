@@ -73,7 +73,7 @@ class MkyEngineTest extends TestCase
     public function testCustomDirective()
     {
         $this->mkyEngine->addDirectives(new TestDirective());
-        $this->assertEquals("'Mky' test", $this->mkyEngine->view('customDirectiveView', ['var' => 'Mky']));
+        $this->assertEquals("Mky test", $this->mkyEngine->view('customDirectiveView', ['var' => 'Mky']));
     }
 
     public function testNativeFormatters()
