@@ -4,6 +4,7 @@ namespace MkyEngine;
 
 use MkyEngine\Interfaces\MkyDirectiveInterface;
 use MkyEngine\MkyDirectives\BaseDirective;
+use ReflectionException;
 
 class MkyDirective
 {
@@ -17,7 +18,7 @@ class MkyDirective
         self::$directives[] = new BaseDirective();
     }
 
-    public static function addDirective(MkyDirectiveInterface $directive)
+    public static function addDirective(MkyDirectiveInterface $directive): void
     {
         self::$directives[] = $directive;
     }
@@ -30,7 +31,14 @@ class MkyDirective
         return self::$directives;
     }
 
-    public function callFunction(string $function, $expression = null, bool $open = true)
+    /**
+     * @param string $function
+     * @param mixed $expression
+     * @param bool $open
+     * @return mixed|null
+     * @throws ReflectionException
+     */
+    public function callFunction(string $function, mixed $expression = null, bool $open = true): mixed
     {
         foreach (self::$directives as $directive) {
             if(array_key_exists($function, $directive->getFunctions())){
