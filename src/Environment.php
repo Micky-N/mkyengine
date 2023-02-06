@@ -12,6 +12,7 @@ use MkyEngine\Exceptions\EnvironmentException;
  */
 class Environment
 {
+    const EXTENSION = '.php';
     /**
      * @var array<string, DirectoryLoader>
      */
@@ -19,12 +20,10 @@ class Environment
 
     /**
      * @param DirectoryLoader $loader
-     * @param string $extension
      * @param array<string, mixed> $context
      */
     public function __construct(
         DirectoryLoader         $loader,
-        private readonly string $extension = '.php',
         private readonly array  $context = []
     )
     {
@@ -48,7 +47,7 @@ class Environment
      */
     public function extension(): string
     {
-        return $this->extension;
+        return self::EXTENSION;
     }
 
     /**
@@ -79,7 +78,7 @@ class Environment
             $view = $parts[1];
         }
         $loader = $this->loader($namespace);
-        return rtrim($loader->{$type . 'Dir'}(), '\/') . DIRECTORY_SEPARATOR . $view . $this->extension;
+        return rtrim($loader->{$type . 'Dir'}(), '\/') . DIRECTORY_SEPARATOR . $view . self::EXTENSION;
     }
 
     /**
