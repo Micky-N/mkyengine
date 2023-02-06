@@ -246,15 +246,6 @@ If the data `$users` is empty you can set a third parameter as string to define 
 <?= $this->component('name-input2')->each($users, 'user', 'empty-user') ?>
 ```
 
-
-## Tests
-
-To execute the test suite, you'll need to install all development dependencies.
-```shell  
-$ git clone https://github.com/Micky-N/MkyEngine  
-$ composer install  
-```  
-
 ## Licence
 
 MIT
