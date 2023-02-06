@@ -227,7 +227,7 @@ If you need to pass a nested value, you can do so by concatenating `name.firstna
 - `$user->name->firstname`
 - `$user->name['firstname']`
 - `$user['name']->firstname`
-- `$user['name']['firtstname']`
+- `$user['name']['firstname']`
 
 ##### String
 The component may need the object or array as parameter (like one user of users), for that you can set in the parameter the name of current iterated data
