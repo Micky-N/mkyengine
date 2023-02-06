@@ -1,185 +1,259 @@
-# MkyEngine  
+# MkyEngine
+
+> *PHP template engine by Micky-N*   
+<a href="https://packagist.org/packages/micky/mkyengine"><img src="https://img.shields.io/packagist/v/micky/mkyengine" alt="Latest Stable Version"></a> [![Generic badge](https://img.shields.io/badge/licence-MIT-1abc9c.svg)](https://shields.io/)
+
+The template engine uses the block and extension system to define the different parts of the view.
+```php
+// index.php
+<?php $this->extends('layout') ?>
+
+<?php $this->block('content') ?>
+  <p>content</p>
+<?php $this->endblock() ?>
+```
+```php
+// layout.php
+<h4>Layout</h4>
+
+<?= $this->section('content') ?>
   
-> *PHP template engine by Micky-N* 
+<p>Footer</p>
+```
+```html
+// render
+<h4>Layout</h4>
 
-[![Generic badge](https://img.shields.io/badge/release-1.0.0-blue.svg)](https://shields.io/) [![Generic badge](https://img.shields.io/badge/coverage-100%25-green.svg)](https://shields.io/) [![Generic badge](https://img.shields.io/badge/licence-MIT-1abc9c.svg)](https://shields.io/)
+<p>content</p>
 
-The template engine uses `<mky/>` tags to generate php code on the view.
+<p>Footer</p>
+```
 
 ## Installation
 
-`composer require micky/mky-engine`
+`composer require micky/mkyengine`
 
 ## Usage
 
-### Configuration
+### Directory Loader
 
-The configuration must have the views, templates and includes directory and cache directory which will serve as a backup for  compiled views
+The directory loader register view directory for template engine
 ```php
-$config = [
-    'views' => 'views directory',
-    'cache' => 'cache directory' // optional
-]
+$loader = new \MkyEngine\DirectoryLoader(__DIR__ . '/views');
 ```
-this configuration is the constructor argument of the \MkyEngine\MkyEngine class
+If you want to define component or layout sub directory use setComponentDir or setLayoutDir
 ```php
-$mkyEngine = new \MkyEngine\MkyEngine($config);
+$loader->setComponentDir('components')->setLayoutDir('layouts');
 ```
-To see view file in browser `echo $mkyEngine->view($view, $params)`,  $view path are written with point 
- `todos.index` from config point : config_views/todos/index.mky and variables are pass as array `['todo' => value]`.
 
-### MkyDirective
+### Environment
 
-Example with "if" directive:
+The environment stores all directories with the namespace and file extension of the view, you can optionally define shared variables
+```php
+$context = [] // Shared environmental variables, optional
+
+$environment = new \MkyEngine\Environment($loader, '.php', $context); 
+```  
+By default, the first namespace is root, you can add another directory loader and its namespace with the method `addLoader()`
+```php
+$environment->addLoader('ns2', $loader2);
+
+// Check if loader exists
+$environment->hasLoader('ns2'); // true
+```
+To use view, component or layout from another namespace use `@namespace:view`
+```php
+<?= $this->component('form') ?> // From root namepsace
+<?= $this->component('@ns2:form') ?> // From ns2 namespace
+```
+### View Compiler
+
+The view compiler compiles the view by retrieving the blocks and displaying them in the layout sections. The first parameter is the environment, the second is the view to be displayed and the third is the view variables.
+```php
+$view = new \MkyEngine\ViewCompile($environment, 'index', [
+   'name' => 'Micky'
+]);
+```
+To render the view use `render()` method
+```php
+echo $view->render();
+```
+
+## Templating
+
+### Layout
+
+The layout is a background for the views, you can define which parts of the layout will be filled by the view.
+```php
+// layout.php
+<h4>Layout</h4>
+<?= $this->section('content') ?>
+<p>Footer</p>
+```
+You can define a default value in the section that will be used if no 'title' block is defined.
+```php
+// layout.php
+<?= $this->section('title', 'default') ?>
+```
+Layout view can extends another layout.
+```php
+// layout.php
+<?php $this->extends('great-layout') ?>
+
+<?php $this->block('title', 'new Title') ?>
+
+<?php $this->block('content2') ?>
+
+   <h4>Layout</h4>
+   <?= $this->section('content') ?>
+
+<?php $this->endblock() ?>
+```
+```php
+// layout.php
+<?= $this->section('title', 'title') ?>  
+  
+<h1>Layout2</h1>  
+  
+<?= $this->section('content2') ?>
+```
+
+### Block
+
+#### Extends
+
+Extends method is used to define the layout file.
+```php
+<?php $this->extends('layout') ?>
+```
+
+Blocks are a part of view use for layout. The param is the block name
+```php
+<?php $this->extends('layout') ?>
+
+<?php $this->block('content') ?>
+  <p>content</p>
+<?php $this->endblock() ?>
+```
+
+You can set a simple block with a second parameter
+```php
+<?php $this->extends('layout') ?>
+
+<?php $this->block('title', 'MkyFramework') ?>
+```
+
+To display this block use section() method in the layout with the block name to display
+```php
+// layout.php
+<h4>Layout</h4>
+<?= $this->section('content') ?>
+<p>Footer</p>
+```
+You can define several blocks with the same name
+```php
+<?php $this->block('content') ?>
+  <p>content</p>
+<?php $this->endblock() ?>
+<?php $this->block('content') ?>
+  <p>second part</p>
+<?php $this->endblock() ?>
+```
+It will show
 ```html
-<mky:if cond="$todo->task == 'Coder'">
-    <div>true</div>
-    <mky:else />
-    <div>false</div>
-</mky:if>
+<p>content</p>
+<p>second part</p>
 ```
-If the condition is true then it will display the text "true" otherwise "false", there are 2 types of directives: long range and short range. Long range directive includes an html code to transform it, ex: if, each, repeat... they are written
-`<mky:directive params="">...html...</mky:directive>` and the short ranges display a result ex: json, and are written `<mky:directive params="" />`.
+Thanks to that, blocks can be conditioned by the method `if()`
+```php
+<?php $this->block('content')->if($condition) ?>
+...
+<?php $this->endblock() ?>
+```
+### Component
 
-*.mky views use the system of **extends**, **yield** and **sections**. With the **include** directive a view can integrate other views, included views inherit parents variables and can receive custom variables.
-```html
-// views/layouts/template.mky
--- HEADER HTML --
-	<mky:yield name="content"/>
--- FOOTER HTML --
+The component is a view piece, useful if you want to use it in several views.
+```php
+<?= $this->component('form') ?>
 ```
-```html
-// views/todos/index.mky
-<mky:extends name="layouts.template" />
-<mky:section name="content">
--- HTML --
-	<mky:include name="includeView" data="['var' => 'variable1']"/>
-</mky:section>
+You can pass a variable to the component with the method `bind()`, the first parameter is the component variable and the second is the value.
+```php
+<?= $this->component('form')->bind('name', 'Micky') ?>
 ```
 
-the yield directive can have a default value with the default parameter `<mky:yield name="title" default="HomePage"/>` and section can become a short directive by adding the value parameter\
- `<mky:section name="title" value="TodoPage"/>`
-
-
-#### List of directives
-
-```yaml
-script(src: null|string): short if src not null, otherwise long
-// get js file or write js script
-
-style(href: null|string): short if href not null, otherwise long
-// get css file or write css
-
-
-if(cond: bool): long
-elseif(cond: bool): short
-else: short
-// if condition
-
-each(loop: array, as: string|null, key: string|null): long
-// foreach loop
-
-repeat(for: int, step: int|null, key: string|null): long
-// for loop
-
-switch(cond: mixed): long
-case(case: mixed): short
-break: short
-default: short
-// switch condition
-
-php: long
-// write php code in template
+Same as block class, components can be conditioned by the method `if()`
+```php
+<?= $this->component('form')->if($condition) ?>
 ```
-To create directives, create a class that implements the \MkyEngine\Interfaces\MkyDirectiveInterface interface and use the "addDirectives" method to add one or multiple directives\
-`$mkyEngine->addDirectives(new TestDirective()) or $mkyEngine->addDirectives([new TestDirective(), new OtherDirective()])` 
+You can repeat a component in loop with 2 methods:
+
+- for
+- each
+
+#### For loop
+
+The first parameter is the number of iterations, the second is a callback that will be called at each iteration. In callback the first parameter is the view params, the second is the current loop index.
+
+*Example:  in username-input.php component there a variable called 'name' for an input, with the callback each iterated component will have the name of the current user*
+```php
+// components/name-input.php
+<input value="<?= $name ?>"/>
+```
+```php
+<?= $this->component('name-input')->for(3, function(array $params, int $index) use ($users){  
+     $params['name'] = $users[$index]->name;  
+     return $params;  
+}) ?>
+```
+#### Each
+
+With the method `each()` , the component will iterate for each array value. The first parameter is the array and the second can be a callback, an array or a string.
+
+##### Callback
+The `each()` callback is the same as the `for()` callback but with a third parameter that it's the array.
+```php
+<?= $this->component('name-input')->each($users, function(array $params, int $index, array $users){
+    $params['name'] = $users[$index]->name;  
+    return $params;  
+}) ?>
+```
+##### Array
+You can bind variable with an array that index is the component variable and the value is the object property or array key of data `$users`
+```php
+<?= $this->component('name-input')->each($users, ['name' => 'name']) ?>
+```
+If you need to pass a nested value, you can do so by concatenating `name.firstname` it's equal to:
+
+- `$user->name->firstname`
+- `$user->name['firstname']`
+- `$user['name']->firstname`
+- `$user['name']['firtstname']`
+
+##### String
+The component may need the object or array as parameter (like one user of users), for that you can set in the parameter the name of current iterated data
+```php
+// components/name-input2.php
+<input value="<?= $user->name ?>"/>
+
+// view
+<?= $this->component('name-input2')->each($users, 'user') ?>
+```
+
+##### Else component
+If the data `$users` is empty you can set a third parameter as string to define the else component
 
 ```php
-class TestDirective implements MkyDirectiveInterface  
-{  
-  
-    public function getFunctions()  
-    {  
-        // set function in the return array like:
-        return [  
-            'shortTest' => [$this, 'shortTest'], // for short directive
-            'longTest' => [[$this, 'longTest'], [$this, 'endlongTest']] // for long directive
-        ];  
-    }  
-    
-    // implement the functions
-    public function shortTest($int)  
-    {  
-        // $var = 10;
-	    // in the view: <div><mky:shortTest int="$var"/></div>
-	    // become <div>$var = 15 (10 + 5)</div>
-	    // to get the variable name: $this->getRealVariable($int) => $var
-        return sprintf('%s = %s (%s + 5)', $this->getRealVariable($int), $int + 5, $int);  
-    }
-
-    // <mky:longTest cls="customClass">-- HTML --</mky:longTest>
-    // become <div class="customClass">-- HTML --</div>
-    public function longTest($cls)  { return '<div class="'.$cls.'">'; }
-    public function endlongTest()   { return '</div>'; }
-}
-``` 
-
-### MkyFormatter
-
-The formatters can change the php variables in the views and are written with a "#" on the right of the variable
-`{{ $var#currency }}`, the 'currency' formatter allows to change variable to a currency format, by default is euro "€" then 
-if $var = 5 then `$var#currency => 5,00 €`.
-To create formatters, create a class that implements \MkyEngine\Interfaces\MkyFormatterInterface interface, use the "addFormatters" method to add one or multiple formatters\
-`$mkyEngine->addFormatters(new ArrayFormatter()) or $mkyEngine->addFormatters([new ArrayFormatter(), new OtherFormatter()])`
-
-```php
-class ArrayFormatter implements MkyFormatterInterface  
-{  
-  
-    public function getFormats()  
-    {  
-        // set function in the return array like:
-        return [  
-            'join' => [$this, 'join'],  
-            'count' => [$this, 'count']  
-        ];  
-    }  
-  
-    // implement the functions
-    public function join(array $array, string $glue = ', ')  
-    {  
-	    // $var = [1,5,3]; {{ $var#join('!') }} => 1!5!3
-        return join($glue, $array);  
-    }  
-  
-    public function count(array $array)  
-    {  
-        // $var = [1,5,3]; {{ $var#count }} => 3
-        return count($array);  
-    }  
-}
+<?= $this->component('name-input2')->each($users, 'user', 'empty-user') ?>
 ```
-Formatters can be chained as `{{ $name #format1 #format2 }}`
 
-#### List of formatters
-
-```yaml
-currency: value to currency, params: string currency (default: 'EUR'), string locale (default: 'fr_FR'),  
-uppercase: value to uppercase,  
-lowercase: value to lowercase,  
-firstCapitalize: uppercase first letter,  
-join: array to string, param: string separator (default: ', '),  
-count: get the number of elements in the array,  
-dateformat: set date to format, param: string format (default:'Y-m-d H:i:s')
-```
 
 ## Tests
 
 To execute the test suite, you'll need to install all development dependencies.
-```shell
-$ git clone https://github.com/Micky-N/MkyEngine
-$ composer install
-```
+```shell  
+$ git clone https://github.com/Micky-N/MkyEngine  
+$ composer install  
+```  
 
 ## Licence
 

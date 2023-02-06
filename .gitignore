@@ -1,7 +1,3 @@
 /vendor/
 /.idea/
-/tests/report/
-/tests/app/cache/views/*.cache.php
 /composer.lock
-/.phpunit.result.cache
-/phpunit.xml

@@ -1,1 +1,0 @@
-variable: {{ $var }} {{ $var2 }}

@@ -1,1 +1,0 @@
-<mky:yield name="content"/> layouts <mky:yield name="title" default="test" />

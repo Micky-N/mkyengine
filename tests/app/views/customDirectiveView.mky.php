@@ -1,1 +1,0 @@
-<mky:test test="$var" />

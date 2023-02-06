@@ -1,1 +1,0 @@
-<mky:include name="includes.foo" data="['var' => 'INCLUDE_VIEW']"/>

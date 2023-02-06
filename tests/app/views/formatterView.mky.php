@@ -1,1 +1,0 @@
-{{ $var#count }} - {{ $var2#currency('USD', 'en_US') }} - {{ $var3#uppercase }}
