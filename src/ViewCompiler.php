@@ -23,7 +23,7 @@ class ViewCompiler
      */
     private array $injects = [];
 
-    public function __construct(private readonly Environment $environment, private readonly string $view, private array $params = [])
+    public function __construct(private readonly Environment $environment, private readonly string $view, private array $variables = [])
     {
     }
 
@@ -85,12 +85,16 @@ class ViewCompiler
      */
     public function render(string $type = 'view'): string
     {
-        extract(array_replace_recursive($this->params, $this->environment->context()));
+        $variables = array_replace_recursive($this->variables, $this->environment->context());
+        foreach ($variables as $name => $variable){
+            $variables[$name] = is_string($variable) ? htmlspecialchars($variable) : $variable;
+        }
+        extract($variables);
         ob_start();
         require($this->environment->view($this->getView(), $type));
         $view = ob_get_clean();
         if ($layout = $this->getLayout()) {
-            $layout = new static($this->environment, $layout, $this->params);
+            $layout = new static($this->environment, $layout, $this->variables);
             $layout->setBlocks($this->getBlocks());
             return $layout->render('layout');
         }
@@ -169,27 +173,27 @@ class ViewCompiler
      */
     public function escape(string $content): string
     {
-        return htmlspecialchars($content);
+        return htmlspecialchars_decode($content);
     }
 
     /**
      * Get all params
      * @return array
      */
-    public function getParams(): array
+    public function getVariables(): array
     {
-        return $this->params;
+        return $this->variables;
     }
 
     /**
      * Set params
      *
-     * @param array $params
+     * @param array $variables
      * @return ViewCompiler
      */
-    public function setParams(array $params): ViewCompiler
+    public function setVariables(array $variables): ViewCompiler
     {
-        $this->params = $params;
+        $this->variables = $variables;
         return $this;
     }
 

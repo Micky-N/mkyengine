@@ -20,22 +20,9 @@ class Block
      */
     private array $contents = [];
 
-    private bool $isHtml = false;
-
     public function __construct(array|string $contents = '')
     {
         $this->contents = $contents ? (array)$contents : [];
-    }
-
-    /**
-     * Render content as html string
-     *
-     * @return $this
-     */
-    public function isHtml(): Block
-    {
-        $this->isHtml = true;
-        return $this;
     }
 
     /**
@@ -64,9 +51,7 @@ class Block
             }, ARRAY_FILTER_USE_BOTH);
         }
 
-        $content = join("\n", $contents);
-
-        return $this->isHtml ? htmlspecialchars($content) : $content;
+        return join("\n", $contents);
     }
 
     /**

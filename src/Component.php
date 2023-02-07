@@ -15,7 +15,7 @@ use MkyEngine\Exceptions\EnvironmentException;
 class Component
 {
     private ViewCompiler $component;
-    private array $params = [];
+    private array $variables = [];
     private int $forCount = 0;
     private ?Closure $forClosure = null;
     private ?bool $condition = null;
@@ -52,7 +52,7 @@ class Component
      */
     public function bind(string $name, mixed $value): static
     {
-        $this->params[$name] = $value;
+        $this->variables[$name] = is_string($value) ? htmlspecialchars($value) : $value;
         return $this;
     }
 
@@ -83,22 +83,21 @@ class Component
         $this->forCount = count($data);
         $this->forData = $data;
         if (is_array($binds)) {
-            $this->forClosure = function (array $params, int $index, array $data) use ($binds) {
+            $this->forClosure = function (array $variables, int $index, array $data) use ($binds) {
                 $arrIndex = array_keys($data);
-                $param = $data[$arrIndex[$index]];
+                $currentData = $data[$arrIndex[$index]];
                 foreach ($binds as $bind => $value) {
-                    $params[$bind] = $this->getBindParam($param, $value);
+                    $variables[$bind] = $this->getBindVariable($currentData, $value);
                 }
-                return $params;
+                return $variables;
             };
         } elseif (is_callable($binds)) {
             $this->forClosure = $binds;
         } elseif (is_string($binds)) {
-            $this->forClosure = function (array $params, int $index, array $data) use ($binds) {
+            $this->forClosure = function (array $variables, int $index, array $data) use ($binds) {
                 $arrIndex = array_keys($data);
-                $param = $data[$arrIndex[$index]];
-                $params[$binds] = $param;
-                return $params;
+                $variables[$binds] = $data[$arrIndex[$index]];
+                return $variables;
             };
         }
         return $this;
@@ -132,8 +131,8 @@ class Component
             $render = '';
             $closure = $this->forClosure;
             for ($i = 0; $i < $this->forCount; $i++) {
-                $this->params = $closure($this->params, $i, $this->forData);
-                $this->component->setParams($this->params);
+                $this->variables = $closure($this->variables, $i, $this->forData);
+                $this->component->setVariables($this->variables);
                 $render .= $this->component->render('component');
             }
             return $render;
@@ -142,28 +141,28 @@ class Component
         }elseif($this->forClosure){
             return '';
         }
-        $this->component->setParams($this->params);
+        $this->component->setVariables($this->variables);
         return $this->component->render('component');
     }
 
-    private function getBindParam(array $param, mixed $value): mixed
+    private function getBindVariable(array $name, mixed $value): mixed
     {
         $values = explode('.', $value);
         for($i = 0; $i < count($values); $i++){
             $val = $values[$i];
-            if(is_array($param)){
-                if(isset($param[$val])){
-                    $param = $param[$val];
+            if(is_array($name)){
+                if(isset($name[$val])){
+                    $name = $name[$val];
                     continue;
                 }
-            }elseif(is_object($param)){
-                if(property_exists($param, $val)){
-                    $param = $param->{$val};
+            }elseif(is_object($name)){
+                if(property_exists($name, $val)){
+                    $name = $name->{$val};
                     continue;
                 }
             }
             break;
         }
-        return $param;
+        return $name;
     }
 }
