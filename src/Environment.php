@@ -82,13 +82,26 @@ class Environment
     }
 
     /**
+     * Check if view file exists
+     *
+     * @param string $view '@namespace:path/view' or 'path/view' for root namespace
+     * @param string $type type be view, layout or component
+     * @return bool
+     * 
+     */
+    public function fileExists(string $view, string $type = 'view'): bool
+    {
+        return file_exists($this->view($view, $type));
+    }
+
+    /**
      * Get loader from namespace
      *
      * @param string $namespace
      * @return DirectoryLoader
      * @throws EnvironmentException
      */
-    public function loader(string $namespace): DirectoryLoader
+    public function loader(string $namespace = 'root'): DirectoryLoader
     {
         if ($this->hasLoader($namespace)) {
             return $this->loaders[$namespace];

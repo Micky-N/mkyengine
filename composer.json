@@ -17,6 +17,11 @@
             "MkyEngine\\": "src/"
         }
     },
+    "autoload-dev": {
+        "psr-4": {
+            "MkyEngine\\Test\\": "test/"
+        }
+    },
     "require": {
         "php": ">=8.1"
     },

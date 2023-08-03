@@ -57,6 +57,20 @@ class Component
     }
 
     /**
+     * Bind param value
+     *
+     * @param array $variables
+     * @return $this
+     */
+    public function binds(array $variables): static
+    {
+        foreach ($variables as $name => $value) {
+            $this->variables[$name] = is_string($value) ? htmlspecialchars($value) : $value;
+        }
+        return $this;
+    }
+
+    /**
      * Repeat the component
      * @param int $count number of repetitions
      * @param Closure $closure callback for each iteration
@@ -136,11 +150,12 @@ class Component
                 $render .= $this->component->render('component');
             }
             return $render;
-        }elseif($this->otherView){
+        } elseif ($this->otherView) {
             $this->setComponent($this->component->getEnvironment(), $this->otherView);
-        }elseif($this->forClosure){
+        } elseif ($this->forClosure) {
             return '';
         }
+
         $this->component->setVariables($this->variables);
         return $this->component->render('component');
     }
@@ -148,15 +163,15 @@ class Component
     private function getBindVariable(array $name, mixed $value): mixed
     {
         $values = explode('.', $value);
-        for($i = 0; $i < count($values); $i++){
+        for ($i = 0; $i < count($values); $i++) {
             $val = $values[$i];
-            if(is_array($name)){
-                if(isset($name[$val])){
+            if (is_array($name)) {
+                if (isset($name[$val])) {
                     $name = $name[$val];
                     continue;
                 }
-            }elseif(is_object($name)){
-                if(property_exists($name, $val)){
+            } elseif (is_object($name)) {
+                if (property_exists($name, $val)) {
                     $name = $name->{$val};
                     continue;
                 }
