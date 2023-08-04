@@ -64,10 +64,10 @@ class Environment
      * Check if view file exists
      *
      * @param string $view '@namespace:path/view' or 'path/view' for root namespace
-     * @param DirectoryTypes $type type be view, layout or component
+     * @param DirectoryType $type type be view, layout or component
      * @return bool
      */
-    public function fileExists(string $view, DirectoryTypes $type = DirectoryTypes::VIEW): bool
+    public function fileExists(string $view, DirectoryType $type = DirectoryType::VIEW): bool
     {
         try {
             return file_exists($this->view($view, $type));
@@ -80,11 +80,11 @@ class Environment
      * Get file from namespace and type
      *
      * @param string $view '@namespace:path/view' or 'path/view' for root namespace
-     * @param DirectoryTypes $type type be view, layout or component
+     * @param DirectoryType $type type be view, layout or component
      * @return string
      * @throws EnvironmentException
      */
-    public function view(string $view, DirectoryTypes $type = DirectoryTypes::VIEW): string
+    public function view(string $view, DirectoryType $type = DirectoryType::VIEW): string
     {
         if ($view[0] !== '@') {
             $namespace = 'root';

@@ -2,6 +2,7 @@
 
 namespace MkyEngine;
 
+use MkyEngine\Abstracts\Partial;
 use MkyEngine\Exceptions\EnvironmentException;
 
 /**
@@ -17,12 +18,19 @@ class ViewCompiler
      * @var array<string, Block>
      */
     private array $blocks = [];
+
+    /**
+     * @var array<string, Component>
+     */
+    private array $components = [];
     private string $layout = '';
 
     /**
      * @var array<string, mixed>
      */
     private array $injects = [];
+
+    private ?Partial $partial = null;
 
     public function __construct(private readonly Environment $environment, private readonly string $view, private array $variables = [])
     {
@@ -50,11 +58,12 @@ class ViewCompiler
     /**
      * End the block
      *
-     * @return Block
+     * @return void
      */
-    public function endblock(): Block
+    public function endblock(): void
     {
         $content = ob_get_clean();
+        $content .= "\n";
         $blockIndex = array_key_last($this->blocks);
         if (isset($this->blocks[$blockIndex])) {
             if ($this->blocks[$blockIndex]->getContentAsString() === "--EMPTY[$blockIndex]--") {
@@ -63,7 +72,6 @@ class ViewCompiler
                 $this->blocks[$blockIndex]->addContent($content);
             }
         }
-        return $this->blocks[$blockIndex];
     }
 
     /**
@@ -74,21 +82,45 @@ class ViewCompiler
      */
     public function component(string $component): string|Component
     {
-        return new Component($this->environment, $component);
+        $this->components[$component] = new Component($this->environment, $component);
+        $this->partial = $this->components[$component];
+        ob_start();
+        return $this->components[$component];
+    }
+
+    /**
+     * Includes a component
+     *
+     * @param string $component
+     * @return void
+     */
+    public function endComponent(): void
+    {
+        $content = ob_get_clean();
+        $componentIndex = array_key_last($this->components);
+        if (isset($this->components[$componentIndex])) {
+            $this->components[$componentIndex]->setScope('default', $content);
+        }
+        echo $this->components[$componentIndex];
+        return;
     }
 
     /**
      * Render the view
      *
-     * @param DirectoryTypes $type
+     * @param DirectoryType $type
      * @return string
      * @throws EnvironmentException
      */
-    public function render(DirectoryTypes $type = DirectoryTypes::VIEW): string
+    public function render(DirectoryType $type = DirectoryType::VIEW, ?object $partial = null): string
     {
         $variables = array_replace_recursive($this->variables, $this->environment->context());
-        foreach ($variables as $name => $variable){
+        foreach ($variables as $name => $variable) {
             $variables[$name] = is_string($variable) ? htmlspecialchars($variable) : $variable;
+        }
+
+        if ($partial) {
+            $this->partial = $partial;
         }
         extract($variables);
         ob_start();
@@ -97,7 +129,7 @@ class ViewCompiler
         if ($layout = $this->getLayout()) {
             $layout = new static($this->environment, $layout, $this->variables);
             $layout->setBlocks($this->getBlocks());
-            return $layout->render(DirectoryTypes::LAYOUT);
+            return $layout->render(DirectoryType::LAYOUT);
         }
         return $view;
     }
@@ -219,6 +251,9 @@ class ViewCompiler
      */
     public function __get(string $name)
     {
+        if ($this->partial && property_exists($this->partial, $name)) {
+            return $this->partial->{$name};
+        }
         return $this->injects[$name] ?? null;
     }
 
@@ -230,5 +265,31 @@ class ViewCompiler
     public function getEnvironment(): Environment
     {
         return $this->environment;
+    }
+
+    public function scope(string $name, string $content = null): Scope
+    {
+        if ($content) {
+            return $this->partial->setScope($name, $content);
+        }
+        $scope = $this->partial->setScope($name, "--EMPTY_SCOPE[$name]--");
+        ob_start();
+        return $scope;
+    }
+
+    /**
+     * End the block
+     *
+     * @return void
+     */
+    public function endscope(): void
+    {
+        $content = ob_get_clean();
+        $content .= "\n";
+        $scopes = $this->partial->getScopes();
+        $scopeIndex = array_key_last($scopes);
+        if (isset($scopes[$scopeIndex]) && $scopes[$scopeIndex]->getContent() === "--EMPTY_SCOPE[$scopeIndex]--") {
+            $scopes[$scopeIndex]->setContent($content);
+        }
     }
 }

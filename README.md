@@ -224,30 +224,38 @@ The `each()` callback is the same as the `for()` callback but with a third param
 ##### Array
 You can bind variable with an array that index is the component variable and the value is the object property or array key of data `$users`
 ```php
-<?= $this->component('name-input')->each($users, ['name' => 'name']) ?>
+<?= $this->component('name-input')->each($users, ['name']) ?> // 'name' => user->name
+<?= $this->component('name-input')->each($users, ['name' => 'firstname']) ?>
 ```
-If you need to pass a nested value, you can do so by concatenating `name.firstname` it's equal to:
+If you need to pass a nested value, you can do so by concatenating `address.postcode` it's equal to:
 
-- `$user->name->firstname`
-- `$user->name['firstname']`
-- `$user['name']->firstname`
-- `$user['name']['firstname']`
+- `$user->{address | getAddress() | magic getter for "address"}->{postcode | getPostcode() | magic getter for "postcode"}`  
+
+Example:  
+- `$user->address->postcode`
+- `$user->getAddress()->postcode`
+- `$user->address['postcode']`
+- `$user->getAddress()['postcode']`
+- `$user['address']->postcode`
+- `$user['address']['postcode']`
+
+All properties and nested properties are accessible if the property exists or a getter, like for `postcode`, `getPostcode()` exists or a magic method exists 
 
 ##### String
 The component may need the object or array as parameter (like one user of users), for that you can set in the parameter the name of current iterated data
 ```php
-// components/name-input2.php
+// components/user-input.php
 <input value="<?= $user->name ?>"/>
 
 // view
-<?= $this->component('name-input2')->each($users, 'user') ?>
+<?= $this->component('user-input2')->each($users, 'user') ?>
 ```
 
 ##### Else component
 If the data `$users` is empty you can set a third parameter as string to define the else component
 
 ```php
-<?= $this->component('name-input2')->each($users, 'user', 'empty-user') ?>
+<?= $this->component('user-input')->each($users, 'user', 'empty-user') ?>
 ```
 
 ## Licence

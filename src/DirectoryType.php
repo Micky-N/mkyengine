@@ -2,7 +2,7 @@
 
 namespace MkyEngine;
 
-enum DirectoryTypes: string
+enum DirectoryType: string
 {
     case VIEW = 'view';
     case COMPONENT = 'component';

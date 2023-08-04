@@ -3,6 +3,8 @@
 namespace MkyEngine;
 
 use Closure;
+use MkyEngine\Abstracts\Partial;
+use MkyEngine\Exceptions\ComponentException;
 use MkyEngine\Exceptions\EnvironmentException;
 
 /**
@@ -12,7 +14,7 @@ use MkyEngine\Exceptions\EnvironmentException;
  *
  * @author Mickaël Ndinga <ndingamickael@gmail.com>
  */
-class Component
+class Component extends Partial
 {
     private ViewCompiler $component;
     private array $variables = [];
@@ -149,7 +151,7 @@ class Component
                     $this->variables = $closure($this->variables, $i, $this->forData);
                 }
                 $this->component->setVariables($this->variables);
-                $render .= $this->component->render(DirectoryTypes::COMPONENT);
+                $render .= $this->component->render(DirectoryType::COMPONENT);
             }
             return $render;
         } elseif ($this->otherView) {
@@ -159,7 +161,7 @@ class Component
         }
 
         $this->component->setVariables($this->variables);
-        return $this->component->render(DirectoryTypes::COMPONENT);
+        return $this->component->render(DirectoryType::COMPONENT, $this);
     }
 
     /**
@@ -176,11 +178,22 @@ class Component
                 if (isset($data[$val])) {
                     $data = $data[$val];
                     continue;
+                }else{
+                    throw ComponentException::VariableNotFound('array', $val, $this->component->getView());
                 }
             } elseif (is_object($data)) {
                 if (property_exists($data, $val)) {
                     $data = $data->{$val};
                     continue;
+                }else if (method_exists($data, 'get'.ucfirst($val))){
+                    $data = $data->{'get'.ucfirst($val)}();
+                    continue;
+                }
+                try{
+                    $data = $data->{$val};
+                    continue;
+                }catch(\Throwable $th){
+                    throw ComponentException::VariableNotFound('object', $val, $this->component->getView());
                 }
             }
             break;
