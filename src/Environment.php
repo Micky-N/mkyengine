@@ -23,8 +23,8 @@ class Environment
      * @param array<string, mixed> $context
      */
     public function __construct(
-        DirectoryLoader         $loader,
-        private readonly array  $context = []
+        DirectoryLoader        $loader,
+        private readonly array $context = []
     )
     {
         $this->loaders['root'] = $loader;
@@ -33,7 +33,7 @@ class Environment
     /**
      * Get all loaders
      *
-     * @return DirectoryLoader[]
+     * @return array<string, DirectoryLoader>
      */
     public function loaders(): array
     {
@@ -53,7 +53,7 @@ class Environment
     /**
      * Get context variables
      *
-     * @return array
+     * @return array<string, mixed>
      */
     public function context(): array
     {
@@ -61,14 +61,30 @@ class Environment
     }
 
     /**
+     * Check if view file exists
+     *
+     * @param string $view '@namespace:path/view' or 'path/view' for root namespace
+     * @param DirectoryTypes $type type be view, layout or component
+     * @return bool
+     */
+    public function fileExists(string $view, DirectoryTypes $type = DirectoryTypes::VIEW): bool
+    {
+        try {
+            return file_exists($this->view($view, $type));
+        } catch (EnvironmentException $exception) {
+            return false;
+        }
+    }
+
+    /**
      * Get file from namespace and type
      *
      * @param string $view '@namespace:path/view' or 'path/view' for root namespace
-     * @param string $type type be view, layout or component
+     * @param DirectoryTypes $type type be view, layout or component
      * @return string
      * @throws EnvironmentException
      */
-    public function view(string $view, string $type = 'view'): string
+    public function view(string $view, DirectoryTypes $type = DirectoryTypes::VIEW): string
     {
         if ($view[0] !== '@') {
             $namespace = 'root';
@@ -78,20 +94,7 @@ class Environment
             $view = $parts[1];
         }
         $loader = $this->loader($namespace);
-        return rtrim($loader->{$type . 'Dir'}(), '\/') . DIRECTORY_SEPARATOR . $view . self::EXTENSION;
-    }
-
-    /**
-     * Check if view file exists
-     *
-     * @param string $view '@namespace:path/view' or 'path/view' for root namespace
-     * @param string $type type be view, layout or component
-     * @return bool
-     * 
-     */
-    public function fileExists(string $view, string $type = 'view'): bool
-    {
-        return file_exists($this->view($view, $type));
+        return rtrim($loader->{$type->value . 'Dir'}(), '\/') . DIRECTORY_SEPARATOR . $view . self::EXTENSION;
     }
 
     /**
@@ -106,7 +109,7 @@ class Environment
         if ($this->hasLoader($namespace)) {
             return $this->loaders[$namespace];
         }
-        throw new EnvironmentException("Namespace '$namespace' not found");
+        throw EnvironmentException::NamespaceNotFound($namespace);
     }
 
     /**
@@ -131,10 +134,9 @@ class Environment
     public function addLoader(string $namespace, DirectoryLoader $loader): Environment
     {
         if ($this->hasLoader($namespace)) {
-            throw new EnvironmentException("Loader '$namespace' already exists");
+            throw EnvironmentException::NamespaceAlreadyExists($namespace);
         }
         $this->loaders[$namespace] = $loader;
         return $this;
     }
-
 }

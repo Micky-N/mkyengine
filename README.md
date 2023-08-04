@@ -182,7 +182,7 @@ You can pass a variable to the component with the method `bind()`, the first par
 ```
 You can pass multiple variables to the component with the method `binds()`.
 ```php
-<?= $this->component('form')->binds(['name' => 'Micky', 'lastname' => 'Ndinga']) ?>
+<?= $this->component('form')->multipleBind(['name' => 'Micky', 'lastname' => 'Ndinga']) ?>
 ```
 
 Same as block class, components can be conditioned by the method `if()`

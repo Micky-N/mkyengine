@@ -62,7 +62,7 @@ class Component
      * @param array $variables
      * @return $this
      */
-    public function binds(array $variables): static
+    public function multipleBind(array $variables): static
     {
         foreach ($variables as $name => $value) {
             $this->variables[$name] = is_string($value) ? htmlspecialchars($value) : $value;
@@ -73,10 +73,10 @@ class Component
     /**
      * Repeat the component
      * @param int $count number of repetitions
-     * @param Closure $closure callback for each iteration
+     * @param Closure|null $closure callback for each iteration
      * @return $this
      */
-    public function for(int $count, Closure $closure): static
+    public function for(int $count, ?Closure $closure = null): static
     {
         $this->forCount = $count;
         $this->forClosure = $closure;
@@ -87,11 +87,11 @@ class Component
      * Repeat the component for the data value
      *
      * @param array<string|int, mixed> $data
-     * @param array|Closure|string $binds
+     * @param array|Closure|string|null $binds
      * @param string $otherView
      * @return $this
      */
-    public function each(array $data, array|Closure|string $binds, string $otherView = ''): static
+    public function each(array $data, array|Closure|string|null $binds = null, string $otherView = ''): static
     {
         $this->otherView = $otherView;
         $this->forCount = count($data);
@@ -105,7 +105,7 @@ class Component
                 }
                 return $variables;
             };
-        } elseif (is_callable($binds)) {
+        } elseif (is_callable($binds) || is_null($binds)) {
             $this->forClosure = $binds;
         } elseif (is_string($binds)) {
             $this->forClosure = function (array $variables, int $index, array $data) use ($binds) {
@@ -145,9 +145,11 @@ class Component
             $render = '';
             $closure = $this->forClosure;
             for ($i = 0; $i < $this->forCount; $i++) {
-                $this->variables = $closure($this->variables, $i, $this->forData);
+                if($closure){
+                    $this->variables = $closure($this->variables, $i, $this->forData);
+                }
                 $this->component->setVariables($this->variables);
-                $render .= $this->component->render('component');
+                $render .= $this->component->render(DirectoryTypes::COMPONENT);
             }
             return $render;
         } elseif ($this->otherView) {
@@ -157,27 +159,32 @@ class Component
         }
 
         $this->component->setVariables($this->variables);
-        return $this->component->render('component');
+        return $this->component->render(DirectoryTypes::COMPONENT);
     }
 
-    private function getBindVariable(array $name, mixed $value): mixed
+    /**
+     * @param array|object $data
+     * @param string $value
+     * @return mixed
+     */
+    private function getBindVariable(array|object $data, string $value): mixed
     {
         $values = explode('.', $value);
         for ($i = 0; $i < count($values); $i++) {
             $val = $values[$i];
-            if (is_array($name)) {
-                if (isset($name[$val])) {
-                    $name = $name[$val];
+            if (is_array($data)) {
+                if (isset($data[$val])) {
+                    $data = $data[$val];
                     continue;
                 }
-            } elseif (is_object($name)) {
-                if (property_exists($name, $val)) {
-                    $name = $name->{$val};
+            } elseif (is_object($data)) {
+                if (property_exists($data, $val)) {
+                    $data = $data->{$val};
                     continue;
                 }
             }
             break;
         }
-        return $name;
+        return $data;
     }
 }

@@ -18,6 +18,7 @@ class ViewCompiler
      */
     private array $blocks = [];
     private string $layout = '';
+
     /**
      * @var array<string, mixed>
      */
@@ -56,7 +57,7 @@ class ViewCompiler
         $content = ob_get_clean();
         $blockIndex = array_key_last($this->blocks);
         if (isset($this->blocks[$blockIndex])) {
-            if ($this->blocks[$blockIndex]->getContent() === "--EMPTY[$blockIndex]--") {
+            if ($this->blocks[$blockIndex]->getContentAsString() === "--EMPTY[$blockIndex]--") {
                 $this->blocks[$blockIndex]->setContent($content);
             } else {
                 $this->blocks[$blockIndex]->addContent($content);
@@ -79,11 +80,11 @@ class ViewCompiler
     /**
      * Render the view
      *
-     * @param string $type
+     * @param DirectoryTypes $type
      * @return string
      * @throws EnvironmentException
      */
-    public function render(string $type = 'view'): string
+    public function render(DirectoryTypes $type = DirectoryTypes::VIEW): string
     {
         $variables = array_replace_recursive($this->variables, $this->environment->context());
         foreach ($variables as $name => $variable){
@@ -96,7 +97,7 @@ class ViewCompiler
         if ($layout = $this->getLayout()) {
             $layout = new static($this->environment, $layout, $this->variables);
             $layout->setBlocks($this->getBlocks());
-            return $layout->render('layout');
+            return $layout->render(DirectoryTypes::LAYOUT);
         }
         return $view;
     }

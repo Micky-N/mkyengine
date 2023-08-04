@@ -20,9 +20,12 @@ class Block
      */
     private array $contents = [];
 
+    /**
+     * @param array|string $contents
+     */
     public function __construct(array|string $contents = '')
     {
-        $this->contents = $contents ? (array)$contents : [];
+        $this->setContent($contents);
     }
 
     /**
@@ -45,7 +48,7 @@ class Block
     public function __toString(): string
     {
         $contents = $this->getContents();
-        if ($conditions = $this->conditions) {
+        if ($this->conditions) {
             $contents = array_filter($contents, function ($part, $index) {
                 return !isset($this->conditions[$index]) || $this->conditions[$index];
             }, ARRAY_FILTER_USE_BOTH);
@@ -67,12 +70,12 @@ class Block
     /**
      * Add content
      *
-     * @param string $contents
+     * @param string $content
      * @return $this
      */
-    public function addContent(string $contents): static
+    public function addContent(string $content): static
     {
-        $this->contents[] = $contents;
+        $this->contents[] = $content;
         return $this;
     }
 
@@ -81,7 +84,7 @@ class Block
      *
      * @return string
      */
-    public function getContent(): string
+    public function getContentAsString(): string
     {
         return join("\n", $this->contents);
     }

@@ -12,7 +12,7 @@ if(!empty($_REQUEST['p'])){
     $viewRenderer = new \MkyEngine\Test\ViewRenderer(TEST_VIEW);
     $environment = $viewRenderer->getEnvironment();
     $environment->loader()->setComponentDir('components');
-    if(!$environment->fileExists($page)){
+    if(!$environment->fileExists($page, \MkyEngine\DirectoryTypes::VIEW)){
         $page = 'default';
     }
     $v = $viewRenderer->render($page);
