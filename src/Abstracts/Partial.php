@@ -2,7 +2,7 @@
 
 namespace MkyEngine\Abstracts;
 
-use MkyEngine\Scope;
+use MkyEngine\Slot;
 
 /**
  * The component represents an included file,
@@ -14,32 +14,31 @@ use MkyEngine\Scope;
 abstract class Partial
 {
 
-    private Partial $instance;
-    
     /**
-     * [Description for $scopes]
-     *
-     * @var array<string, Scope>
+     * @var array<string, Slot>
      */
-    public array $scopes = [];
+    private array $slots = [];
 
-    /**
-     * @param string $component
-     * @author Mickaël Ndinga <ndingamickael@gmail.com>
-     */
-    public function __construct()
+    public function getSlots(): array
     {
-        $this->instance = $this;
+        return $this->slots;
     }
 
-    public function getScopes(): array
+    public function getSlot(string $name): Slot
     {
-        return $this->scopes;
+        return $this->slots[$name];
     }
 
-    public function setScope(string $name, string $content): Scope
+    public function hasSlot(string $name): bool
     {
-        $this->scopes[$name] = new Scope($content);
-        return $this->scopes[$name];
+        return isset($this->slots[$name]);
     }
+
+    public function setSlot(string $name, string $content): Slot
+    {
+        $this->slots[$name] = new Slot($content);
+        return $this->slots[$name];
+    }
+
+    abstract public function getView(): string;
 }

@@ -19,4 +19,9 @@ class ComponentException extends Exception
         }
         return new static($message . ".");
     }
+
+    static public function ScopeNotFound(string $scope, string $component): static
+    {
+        return new static("Scope \"$scope\" not found in \"$component\" component.");
+    }
 }

@@ -16,7 +16,7 @@ use MkyEngine\Exceptions\EnvironmentException;
  */
 class Component extends Partial
 {
-    private ViewCompiler $component;
+    private ViewCompiler $viewCompiler;
     private array $variables = [];
     private int $forCount = 0;
     private ?Closure $forClosure = null;
@@ -31,7 +31,7 @@ class Component extends Partial
      */
     public function __construct(Environment $environment, string $component)
     {
-        $this->setComponent($environment, $component);
+        $this->setViewCompiler($environment, $component);
     }
 
     /**
@@ -40,9 +40,9 @@ class Component extends Partial
      * @param Environment $environment
      * @param string $component
      */
-    public function setComponent(Environment $environment, string $component): void
+    public function setViewCompiler(Environment $environment, string $component): void
     {
-        $this->component = new ViewCompiler($environment, $component);
+        $this->viewCompiler = new ViewCompiler($environment, $component);
     }
 
     /**
@@ -150,24 +150,25 @@ class Component extends Partial
                 if($closure){
                     $this->variables = $closure($this->variables, $i, $this->forData);
                 }
-                $this->component->setVariables($this->variables);
-                $render .= $this->component->render(DirectoryType::COMPONENT);
+                $this->viewCompiler->setVariables($this->variables);
+                $render .= $this->viewCompiler->render(DirectoryType::COMPONENT);
             }
             return $render;
         } elseif ($this->otherView) {
-            $this->setComponent($this->component->getEnvironment(), $this->otherView);
+            $this->setViewCompiler($this->viewCompiler->getEnvironment(), $this->otherView);
         } elseif ($this->forClosure) {
             return '';
         }
 
-        $this->component->setVariables($this->variables);
-        return $this->component->render(DirectoryType::COMPONENT, $this);
+        $this->viewCompiler->setVariables($this->variables);
+        return $this->viewCompiler->render(DirectoryType::COMPONENT, $this);
     }
 
     /**
      * @param array|object $data
      * @param string $value
      * @return mixed
+     * @throws ComponentException
      */
     private function getBindVariable(array|object $data, string $value): mixed
     {
@@ -179,7 +180,7 @@ class Component extends Partial
                     $data = $data[$val];
                     continue;
                 }else{
-                    throw ComponentException::VariableNotFound('array', $val, $this->component->getView());
+                    throw ComponentException::VariableNotFound('array', $val, $this->viewCompiler->getView());
                 }
             } elseif (is_object($data)) {
                 if (property_exists($data, $val)) {
@@ -193,11 +194,16 @@ class Component extends Partial
                     $data = $data->{$val};
                     continue;
                 }catch(\Throwable $th){
-                    throw ComponentException::VariableNotFound('object', $val, $this->component->getView());
+                    throw ComponentException::VariableNotFound('object', $val, $this->viewCompiler->getView());
                 }
             }
             break;
         }
         return $data;
+    }
+
+    public function getView(): string
+    {
+        return $this->viewCompiler->getView();
     }
 }

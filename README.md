@@ -41,7 +41,7 @@ The directory loader register view directory for template engine
 ```php
 $loader = new \MkyEngine\DirectoryLoader(__DIR__ . '/views');
 ```
-If you want to define component or layout sub directory use setComponentDir or setLayoutDir
+If you want to define component or layout subdirectory use setComponentDir or setLayoutDir
 ```php
 $loader->setComponentDir('components')->setLayoutDir('layouts');
 ```
@@ -95,7 +95,7 @@ You can define a default value in the section that will be used if no 'title' bl
 // layout.php
 <?= $this->section('title', 'default') ?>
 ```
-Layout view can extends another layout.
+Layout view can extend another layout.
 ```php
 // layout.php
 <?php $this->extends('great-layout') ?>
@@ -257,6 +257,34 @@ If the data `$users` is empty you can set a third parameter as string to define 
 ```php
 <?= $this->component('user-input')->each($users, 'user', 'empty-user') ?>
 ```
+
+##### Component slot
+In the case you have a component which you want to make the body dynamic like:
+
+```php
+// components/alert.php
+<div>
+    <p>$this->slot('default')</p>
+    <?php if($this->hasSlot('message')): ?>
+        <button><?= $this->slot('message') ?></button>
+    <?php endif ?>
+</div>
+```
+A simple alert component with a conditional button, to use this in your view, you have to set two slots: the `default` and `message` slot
+
+```php
+// view
+<?php $this->component('alert') ?>
+    this is an alert
+    <?php $this->addslot('message', 'confirm') ?>
+    // Or
+    <?php $this->addslot('message') ?>
+        <span>confirm</span> the alert
+    <?php $this->endslot() ?>
+<?php $this->endcomponent() ?>
+```
+
+All texts that are not in a slot will be placed in the default slot.
 
 ## Licence
 

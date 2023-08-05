@@ -8,7 +8,7 @@ namespace MkyEngine;
  *
  * @author Mickaël Ndinga <ndingamickael@gmail.com>
  */
-class Scope
+class Slot
 {
 
     private ?bool $condition = null;
@@ -65,9 +65,9 @@ class Scope
      * Set content
      *
      * @param string $contents
-     * @return Scope
+     * @return Slot
      */
-    public function setContent(string $content): Scope
+    public function setContent(string $content): Slot
     {
         $this->content = $content;
         return $this;

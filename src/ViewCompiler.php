@@ -3,6 +3,7 @@
 namespace MkyEngine;
 
 use MkyEngine\Abstracts\Partial;
+use MkyEngine\Exceptions\ComponentException;
 use MkyEngine\Exceptions\EnvironmentException;
 
 /**
@@ -91,7 +92,6 @@ class ViewCompiler
     /**
      * Includes a component
      *
-     * @param string $component
      * @return void
      */
     public function endComponent(): void
@@ -99,20 +99,20 @@ class ViewCompiler
         $content = ob_get_clean();
         $componentIndex = array_key_last($this->components);
         if (isset($this->components[$componentIndex])) {
-            $this->components[$componentIndex]->setScope('default', $content);
+            $this->components[$componentIndex]->setSlot('default', trim($content));
         }
         echo $this->components[$componentIndex];
-        return;
     }
 
     /**
      * Render the view
      *
      * @param DirectoryType $type
+     * @param Partial|null $partial
      * @return string
      * @throws EnvironmentException
      */
-    public function render(DirectoryType $type = DirectoryType::VIEW, ?object $partial = null): string
+    public function render(DirectoryType $type = DirectoryType::VIEW, ?Partial $partial = null): string
     {
         $variables = array_replace_recursive($this->variables, $this->environment->context());
         foreach ($variables as $name => $variable) {
@@ -209,6 +209,24 @@ class ViewCompiler
         return htmlspecialchars_decode($content);
     }
 
+    public function attr(array ...$attributes): string
+    {
+        $attributes = array_merge_recursive(...$attributes);
+        array_walk($attributes, function (&$attribute, $key) {
+            if (is_array($attribute) && is_string(array_keys($attribute)[0])) {
+                $last = array_key_last($attribute);
+                array_walk($attribute, function (&$value, $key2) use ($last) {
+                    $separator = $last !== $key2 ? ';' : '';
+                    $value = "$key2: $value$separator";
+                });
+            }
+            $value = join(' ', (array)$attribute);
+            $attribute = "$key=\"$value\"";
+        });
+
+        return join(' ', $attributes);
+    }
+
     /**
      * Get all params
      * @return array
@@ -267,14 +285,36 @@ class ViewCompiler
         return $this->environment;
     }
 
-    public function scope(string $name, string $content = null): Scope
+    public function addslot(string $name, string $content = null): Slot
     {
         if ($content) {
-            return $this->partial->setScope($name, $content);
+            return $this->partial->setSlot($name, $content);
         }
-        $scope = $this->partial->setScope($name, "--EMPTY_SCOPE[$name]--");
+        $slot = $this->partial->setSlot($name, "--EMPTY_SLOT[$name]--");
         ob_start();
-        return $scope;
+        return $slot;
+    }
+
+    /**
+     * @param string $name
+     * @param string|null $default
+     * @return string
+     * @throws ComponentException
+     */
+    public function slot(string $name, string $default = null): string
+    {
+        if ($this->partial->hasSlot($name)) {
+            return $this->partial->getSlot($name);
+        }
+        if($default){
+            return $default;
+        }
+        throw ComponentException::ScopeNotFound($name, $this->partial->getView());
+    }
+
+    public function hasSlot(string $name): bool
+    {
+        return $this->partial->hasSlot($name);
     }
 
     /**
@@ -282,14 +322,14 @@ class ViewCompiler
      *
      * @return void
      */
-    public function endscope(): void
+    public function endslot(): void
     {
         $content = ob_get_clean();
-        $content .= "\n";
-        $scopes = $this->partial->getScopes();
-        $scopeIndex = array_key_last($scopes);
-        if (isset($scopes[$scopeIndex]) && $scopes[$scopeIndex]->getContent() === "--EMPTY_SCOPE[$scopeIndex]--") {
-            $scopes[$scopeIndex]->setContent($content);
+        $content = trim($content);
+        $slots = $this->partial->getSlots();
+        $slotIndex = array_key_last($slots);
+        if (isset($slots[$slotIndex]) && $slots[$slotIndex]->getContent() === "--EMPTY_SLOT[$slotIndex]--") {
+            $slots[$slotIndex]->setContent($content);
         }
     }
 }
