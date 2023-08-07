@@ -171,6 +171,63 @@ Thanks to that, blocks can be conditioned by the method `if()`
 ...
 <?php $this->endblock() ?>
 ```
+
+### Injection
+
+Thanks to injection method `$this->inject` you can set object used for HTML template like number formatter or form builder as View property
+
+Example FormBuilder:
+```php
+class FormBuilder
+{
+    public function open(array $attr): string
+    {
+        return "<form method='{$attr['method']}' action='{$attr['action']}'>";
+    }
+
+    public function input(string $type, string $name, string $value = ''): string
+    {
+        return "<input type='$type' name='$name' value='$value'>";
+    }
+
+    public function submit(string $message, string $name = ''): string
+    {
+        return "<button type='submit'" . ($name ? " name='$name'" : '') . ">$message</button>";
+    }
+
+    public function close(): string
+    {
+        return "</form>";
+    }
+}
+```
+In the view:
+
+```php
+// view.php
+<?php $this->inject('form', FormBuilder::class) ?>
+```
+The first parameter is the name of property you want to register in the view instance and the second is the class to instantiate, you can pass a class instance or a class name.
+You will be able to use class via `$this->nameOfProperty`
+
+```php
+<?php $this->inject('form', FormBuilder::class) ?>
+<?= $this->form->open(['method' => 'POST', 'action' => '/create']) ?>
+    <?= $this->form->input('text', 'firstname', 'Micky') ?>
+    <?= $this->form->input('text', 'lastname', 'Ndinga') ?>
+    <?= $this->form->submit('Save') ?>
+<?= $this->form->close() ?>
+```
+The HTML rendering will be:
+```html
+<!--Rendering-->
+<form method="POST" action="/create">
+    <input type="text" name="firstname" value="Micky">
+    <input type="text" name="lastname" value="Ndinga">
+    <button type="submit">Save</button>
+</form>
+```
+
 ### Component
 
 The component is a view piece, useful if you want to use it in several views.
