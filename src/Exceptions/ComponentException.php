@@ -20,8 +20,13 @@ class ComponentException extends Exception
         return new static($message . ".");
     }
 
-    static public function ScopeNotFound(string $scope, string $component): static
+    static public function SlotNotFound(string $scope, string $component): static
     {
-        return new static("Scope \"$scope\" not found in \"$component\" component.");
+        return new static("Slot \"$scope\" not found in \"$component\" component.");
+    }
+
+    static public function FileNotFound(string $file): static
+    {
+        return new static("Component \"$file\" not found.");
     }
 }

@@ -17,13 +17,19 @@ class Slot
      * @var string
      */
     private string $content = '';
+    private string $name;
+    private string $index;
 
     /**
+     * @param string $name
      * @param string $content
+     * @param string $index
      */
-    public function __construct(string $content = '')
+    public function __construct(string $name, string $content, string $index)
     {
+        $this->setName($name);
         $this->setContent($content);
+        $this->setIndex($index);
     }
 
     /**
@@ -51,6 +57,11 @@ class Slot
         return $this->getContent();
     }
 
+    public function getCondition(): ?bool
+    {
+        return $this->condition;
+    }
+
     /**
      * Get content
      *
@@ -64,12 +75,42 @@ class Slot
     /**
      * Set content
      *
-     * @param string $contents
+     * @param string $content
      * @return Slot
      */
     public function setContent(string $content): Slot
     {
         $this->content = $content;
         return $this;
+    }
+
+    public function setName(string $name): static
+    {
+        $this->name = $name;
+        return $this;
+    }
+
+    /**
+     * @return string
+     */
+    public function getName(): string
+    {
+        return $this->name;
+    }
+
+    /**
+     * @return string
+     */
+    public function getIndex(): string
+    {
+        return $this->index;
+    }
+
+    /**
+     * @param string $index
+     */
+    public function setIndex(string $index): void
+    {
+        $this->index = $index;
     }
 }

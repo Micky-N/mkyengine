@@ -14,6 +14,9 @@ class DirectoryLoader
     private string $layoutDirectory;
     private string $componentDirectory;
 
+    /**
+     * @param string $viewDirectory
+     */
     public function __construct(string $viewDirectory)
     {
         $viewDirectory = rtrim($viewDirectory, '\/');

@@ -71,7 +71,7 @@ class Environment
     {
         try {
             return file_exists($this->view($view, $type));
-        } catch (EnvironmentException $exception) {
+        } catch (EnvironmentException) {
             return false;
         }
     }

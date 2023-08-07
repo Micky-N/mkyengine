@@ -4,9 +4,13 @@ namespace MkyEngine\Test;
 
 class User
 {
-    public function getName(): string
+    public function __construct(private readonly string $name = 'Micky')
     {
-        return 'Micky';
+    }
+
+    public function getNameText(): string
+    {
+        return $this->name;
     }
 
     public function getAddress(): Address

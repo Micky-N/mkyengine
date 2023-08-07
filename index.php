@@ -16,6 +16,6 @@ if(!empty($_REQUEST['p'])){
     if(!$environment->fileExists($page, \MkyEngine\DirectoryType::VIEW)){
         $page = 'default';
     }
-    $v = $viewRenderer->render($page, ['users' => [new User], 'texts' => [['text' => 'test']]]);
+    $v = $viewRenderer->render($page, ['users' => [new User, new User('Keke')], 'texts' => [['text' => 'test']]]);
     echo $v->render();
 }

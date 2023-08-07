@@ -53,7 +53,6 @@ class Block
                 return !isset($this->conditions[$index]) || $this->conditions[$index];
             }, ARRAY_FILTER_USE_BOTH);
         }
-
         return join("\n", $contents);
     }
 

@@ -39,20 +39,21 @@ The template engine uses the block and extension system to define the different 
 
 The directory loader register view directory for template engine
 ```php
-$loader = new \MkyEngine\DirectoryLoader(__DIR__ . '/views');
+$loader = new \MkyEngine\DirectoryLoader('views_dir');
 ```
 If you want to define component or layout subdirectory use setComponentDir or setLayoutDir
 ```php
-$loader->setComponentDir('components')->setLayoutDir('layouts');
+$loader->setComponentDir('components_dir')->setLayoutDir('layouts_dir');
 ```
+component directory will be `views_dir/components_dir` and layout directory will be `views_dir/layouts_dir`
 
 ### Environment
 
 The environment stores all directories with the namespace and file extension of the view, you can optionally define shared variables
 ```php
-$context = [] // Shared environmental variables, optional
+$context = [] // Shared environment variables, optional
 
-$environment = new \MkyEngine\Environment($loader, '.php', $context); 
+$environment = new \MkyEngine\Environment($loader, $context); 
 ```  
 By default, the first namespace is root, you can add another directory loader and its namespace with the method `addLoader()`
 ```php
@@ -198,7 +199,7 @@ You can repeat a component in loop with 2 methods:
 
 The first parameter is the number of iterations, the second is a callback that will be called at each iteration. In callback the first parameter is the view params, the second is the current loop index.
 
-*Example:  in username-input.php component there a variable called 'name' for an input, with the callback each iterated component will have the name of the current user*
+*Example: in name-input.php component there a variable called 'name' for an input, with the callback each iterated component will have the name of the current user*
 ```php
 // components/name-input.php
 <input value="<?= $name ?>"/>
@@ -225,7 +226,7 @@ The `each()` callback is the same as the `for()` callback but with a third param
 You can bind variable with an array that index is the component variable and the value is the object property or array key of data `$users`
 ```php
 <?= $this->component('name-input')->each($users, ['name']) ?> // 'name' => user->name
-<?= $this->component('name-input')->each($users, ['name' => 'firstname']) ?>
+<?= $this->component('name-input')->each($users, ['name' => 'firstname']) ?> // 'name' => user->firstname
 ```
 If you need to pass a nested value, you can do so by concatenating `address.postcode` it's equal to:
 
@@ -263,28 +264,58 @@ In the case you have a component which you want to make the body dynamic like:
 
 ```php
 // components/alert.php
-<div>
-    <p>$this->slot('default')</p>
-    <?php if($this->hasSlot('message')): ?>
-        <button><?= $this->slot('message') ?></button>
+<div class="alert alert-<?= $type ?>">
+    <div>
+        <p><?= ucfirst($type) ?>:</p>
+        <?= $this->slot('default') ?>
+    </div>
+    <?php if ($this->hasSlot('confirm')): ?>
+        <button id="confirm"><?= $this->slot('confirm') ?></button>
+    <?php endif ?>
+    <?php if ($this->hasSlot('close')): ?>
+        <button id="close"><?= $this->slot('close') ?></button>
     <?php endif ?>
 </div>
 ```
-A simple alert component with a conditional button, to use this in your view, you have to set two slots: the `default` and `message` slot
+A simple alert component with a conditional button, to use this in your view, you have to set three slots: the `default`, `confirm` and `close` slot
 
 ```php
 // view
-<?php $this->component('alert') ?>
+<?php $this->component('alert')->bind('type', 'danger') ?>
     this is an alert
-    <?php $this->addslot('message', 'confirm') ?>
+    <?php $this->addslot('confirm', 'confirm the alert') ?>
     // Or
-    <?php $this->addslot('message') ?>
+    <?php $this->addslot('confirm') ?>
         <span>confirm</span> the alert
     <?php $this->endslot() ?>
-<?php $this->endcomponent() ?>
+    
+    <?php $this->addslot('close', 'Close info') ?>
+
+<?php $this->component('alert')->end() ?>
 ```
 
-All texts that are not in a slot will be placed in the default slot.
+The HTML rendering will be:
+```html
+<div class="alert alert-danger">
+    <div>
+        <p>Danger:</p>
+        this is an alert
+    </div>
+    <button id="confirm"><span>confirm</span> the alert</button>
+    <button id="close">Close info</button>
+</div>
+```
+
+All texts not in a slot will be placed in the default slot. Slots can be conditional:
+
+```php
+<?php $this->addslot('close', 'Close info')->if($type == 'info') ?>
+```
+
+You can also make a default value for empty slot to avoid error message
+```php
+<?= $this->slot('default', 'default text') ?>
+```
 
 ## Licence
 

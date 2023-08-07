@@ -14,12 +14,12 @@ class ViewRenderer
     }
 
 
-    public function render(string $view, array $variables = [])
+    public function render(string $view, array $variables = []): \MkyEngine\ViewCompiler
     {
         return new \MkyEngine\ViewCompiler($this->environment, $view, $variables);
     }
 
-    public function getEnvironment()
+    public function getEnvironment(): Environment
     {
         return $this->environment;
     }

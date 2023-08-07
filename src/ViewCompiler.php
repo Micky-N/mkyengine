@@ -2,9 +2,10 @@
 
 namespace MkyEngine;
 
-use MkyEngine\Abstracts\Partial;
+use Exception;
 use MkyEngine\Exceptions\ComponentException;
 use MkyEngine\Exceptions\EnvironmentException;
+use MkyEngine\Exceptions\ViewCompilerException;
 
 /**
  * The view compiler compile the view with
@@ -19,7 +20,6 @@ class ViewCompiler
      * @var array<string, Block>
      */
     private array $blocks = [];
-
     /**
      * @var array<string, Component>
      */
@@ -30,8 +30,7 @@ class ViewCompiler
      * @var array<string, mixed>
      */
     private array $injects = [];
-
-    private ?Partial $partial = null;
+    private ?Component $currentComponent = null;
 
     public function __construct(private readonly Environment $environment, private readonly string $view, private array $variables = [])
     {
@@ -78,53 +77,36 @@ class ViewCompiler
     /**
      * Includes a component
      *
-     * @param string $component
+     * @param string $name
      * @return string|Component
+     * @throws ComponentException|EnvironmentException
      */
-    public function component(string $component): string|Component
+    public function component(string $name): string|Component
     {
-        $this->components[$component] = new Component($this->environment, $component);
-        $this->partial = $this->components[$component];
-        ob_start();
-        return $this->components[$component];
-    }
-
-    /**
-     * Includes a component
-     *
-     * @return void
-     */
-    public function endComponent(): void
-    {
-        $content = ob_get_clean();
-        $componentIndex = array_key_last($this->components);
-        if (isset($this->components[$componentIndex])) {
-            $this->components[$componentIndex]->setSlot('default', trim($content));
-        }
-        echo $this->components[$componentIndex];
+        $this->currentComponent = new Component($this->environment, $name);
+        $this->components[] = $this->currentComponent;
+        $this->currentComponent->setComponents($this->components);
+        return $this->currentComponent;
     }
 
     /**
      * Render the view
      *
-     * @param DirectoryType $type
-     * @param Partial|null $partial
+     * @param DirectoryType $directoryType
+     * @param Component|null $component
      * @return string
      * @throws EnvironmentException
      */
-    public function render(DirectoryType $type = DirectoryType::VIEW, ?Partial $partial = null): string
+    public function render(DirectoryType $directoryType = DirectoryType::VIEW, ?Component $component = null): string
     {
+        if ($component) {
+            $this->currentComponent = $component;
+        }
         $variables = array_replace_recursive($this->variables, $this->environment->context());
-        foreach ($variables as $name => $variable) {
-            $variables[$name] = is_string($variable) ? htmlspecialchars($variable) : $variable;
-        }
 
-        if ($partial) {
-            $this->partial = $partial;
-        }
         extract($variables);
         ob_start();
-        require($this->environment->view($this->getView(), $type));
+        require($this->environment->view($this->getView(), $directoryType));
         $view = ob_get_clean();
         if ($layout = $this->getLayout()) {
             $layout = new static($this->environment, $layout, $this->variables);
@@ -209,26 +191,9 @@ class ViewCompiler
         return htmlspecialchars_decode($content);
     }
 
-    public function attr(array ...$attributes): string
-    {
-        $attributes = array_merge_recursive(...$attributes);
-        array_walk($attributes, function (&$attribute, $key) {
-            if (is_array($attribute) && is_string(array_keys($attribute)[0])) {
-                $last = array_key_last($attribute);
-                array_walk($attribute, function (&$value, $key2) use ($last) {
-                    $separator = $last !== $key2 ? ';' : '';
-                    $value = "$key2: $value$separator";
-                });
-            }
-            $value = join(' ', (array)$attribute);
-            $attribute = "$key=\"$value\"";
-        });
-
-        return join(' ', $attributes);
-    }
-
     /**
      * Get all params
+     *
      * @return array
      */
     public function getVariables(): array
@@ -249,29 +214,39 @@ class ViewCompiler
     }
 
     /**
-     * Add a property to params
+     * Set params
      *
      * @param string $name
-     * @param string $class
-     * @return $this
+     * @param mixed $value
+     * @return ViewCompiler
      */
-    public function inject(string $name, string $class): static
+    public function setVariable(string $name, mixed $value): ViewCompiler
     {
-        $this->injects[$name] = new $class();
+        $this->variables[$name] = is_string($value) ? htmlspecialchars($value) : $value;
         return $this;
     }
 
     /**
-     * Magic getter
+     * Add a class property
+     *
+     * @param string $name
+     * @param string|object $class
+     * @return $this
+     */
+    public function inject(string $name, string|object $class): static
+    {
+        $this->injects[$name] = is_string($class) ? new $class : $class;
+        return $this;
+    }
+
+    /**
+     * Magic getter for injected classes
      *
      * @param string $name
      * @return mixed|null
      */
     public function __get(string $name)
     {
-        if ($this->partial && property_exists($this->partial, $name)) {
-            return $this->partial->{$name};
-        }
         return $this->injects[$name] ?? null;
     }
 
@@ -285,51 +260,92 @@ class ViewCompiler
         return $this->environment;
     }
 
+    /**
+     * Add slot to component
+     *
+     * @param string $name
+     * @param string|null $content
+     * @return Slot
+     * @throws ViewCompilerException
+     */
     public function addslot(string $name, string $content = null): Slot
     {
+        $this->inComponentScope();
         if ($content) {
-            return $this->partial->setSlot($name, $content);
+            return $this->currentComponent->setSlot($name, $content);
         }
-        $slot = $this->partial->setSlot($name, "--EMPTY_SLOT[$name]--");
+        $slot = $this->currentComponent->setSlot($name, "--EMPTY_SLOT[$name]--");
         ob_start();
         return $slot;
     }
 
     /**
-     * @param string $name
-     * @param string|null $default
-     * @return string
-     * @throws ComponentException
+     * Check if code is in component scope
+     *
+     * @param string $type
+     * @return void
+     * @throws ViewCompilerException
      */
-    public function slot(string $name, string $default = null): string
+    private function inComponentScope(string $type = 'slot'): void
     {
-        if ($this->partial->hasSlot($name)) {
-            return $this->partial->getSlot($name);
+        if (!$this->currentComponent) {
+            throw ViewCompilerException::InComponentScope($type);
         }
-        if($default){
-            return $default;
-        }
-        throw ComponentException::ScopeNotFound($name, $this->partial->getView());
-    }
-
-    public function hasSlot(string $name): bool
-    {
-        return $this->partial->hasSlot($name);
     }
 
     /**
-     * End the block
+     * Show slot html or default if empty
+     *
+     * @param string $name
+     * @param string|null $default
+     * @return string
+     * @throws ComponentException|ViewCompilerException
+     */
+    public function slot(string $name, string $default = null): string
+    {
+        $this->inComponentScope();
+        if ($this->currentComponent->hasSlot($name)) {
+            return $this->currentComponent->getSlot($name);
+        }
+        if ($default) {
+            return $default;
+        }
+        throw ComponentException::SlotNotFound($name, $this->currentComponent->getView());
+    }
+
+    /**
+     * Check if slot is defined
+     *
+     * @param string $name
+     * @return bool
+     * @throws ViewCompilerException
+     */
+    public function hasSlot(string $name): bool
+    {
+        $this->inComponentScope();
+        return $this->currentComponent->hasSlot($name);
+    }
+
+    /**
+     * End the slot
      *
      * @return void
+     * @throws ViewCompilerException
      */
     public function endslot(): void
     {
+        $this->inComponentScope();
         $content = ob_get_clean();
         $content = trim($content);
-        $slots = $this->partial->getSlots();
+        $slots = $this->currentComponent->getSlots();
         $slotIndex = array_key_last($slots);
-        if (isset($slots[$slotIndex]) && $slots[$slotIndex]->getContent() === "--EMPTY_SLOT[$slotIndex]--") {
-            $slots[$slotIndex]->setContent($content);
+
+        if (isset($slots[$slotIndex])) {
+            $slot = $slots[$slotIndex];
+            $name = $slot->getName();
+            if ($slot->getContent() === "--EMPTY_SLOT[$name]--") {
+                $slots[$slotIndex]->setContent($content);
+            }
         }
     }
 }
