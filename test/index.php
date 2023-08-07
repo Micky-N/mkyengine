@@ -1,8 +1,8 @@
 <?php
 use MkyEngine\Test\User;
 
-require_once './vendor/autoload.php';
-defined('TEST_VIEW') or define('TEST_VIEW', __DIR__ . '/test/views/');
+require_once '../vendor/autoload.php';
+defined('TEST_VIEW') or define('TEST_VIEW', dirname(__DIR__) . '/test/views/');
 
 if(!$_REQUEST){
     $_REQUEST['p'] = 'default';
